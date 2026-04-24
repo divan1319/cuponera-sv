@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # =============================================================================
-# init.sh — Bootstrap de proyecto Laravel + Sail
+# inicializar.sh — Bootstrap de proyecto Laravel + Sail (La Cuponera SV)
 # Requisitos: Docker (con Docker Compose) instalado. NO necesita PHP ni Composer.
+# Uso: bash inicializar.sh
 # =============================================================================
 
 set -e
@@ -14,117 +15,140 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+BOLD='\033[1m'
+NC='\033[0m'
 
 info()    { echo -e "${CYAN}[INFO]${NC}  $1"; }
-success() { echo -e "${GREEN}where.exe php[OK]${NC}    $1"; }
+success() { echo -e "${GREEN}[OK]${NC}    $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC}  $1"; }
 error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
+step()    { echo -e "\n${BOLD}$1${NC}"; }
 
 # ---------------------------------------------------------------------------
-# 1. Verificar que Docker esté disponible
+# 1. Verificar que Docker esté disponible y corriendo
 # ---------------------------------------------------------------------------
-info "Verificando Docker..."
-command -v docker >/dev/null 2>&1 || error "Docker no está instalado o no está 
-en el PATH."
-docker info >/dev/null 2>&1     || error "El daemon de Docker no está corriendo."
+step "── 1. Verificando Docker ──────────────────────────────────"
+command -v docker >/dev/null 2>&1 || error "Docker no encontrado. Instálalo desde https://www.docker.com"
+docker info >/dev/null 2>&1       || error "Docker está instalado pero no está corriendo. Ábrelo e intenta de nuevo."
 success "Docker disponible."
 
 # ---------------------------------------------------------------------------
-# 2. Variables configurables
+# 2. Moverse al directorio del proyecto
 # ---------------------------------------------------------------------------
-APP_DIR="${APP_DIR:-$(pwd)}"                # Directorio raíz del proyecto (donde está composer.json)
-SAIL_SERVICES="${SAIL_SERVICES:-pgsql}"     # Servicios de Sail: pgsql, mysql, redis, etc.
-
-info "Directorio del proyecto : $APP_DIR"
-info "Servicios Sail           : $SAIL_SERVICES"
-
+APP_DIR="${APP_DIR:-$(cd "$(dirname "$0")" && pwd)}"
 cd "$APP_DIR"
+info "Directorio: $APP_DIR"
 
 # ---------------------------------------------------------------------------
-# 3. Copiar .env si no existe
+# 3. Crear .env si no existe
 # ---------------------------------------------------------------------------
+step "── 2. Configuración de entorno ────────────────────────────"
 if [ ! -f ".env" ]; then
-  if [ -f ".env.example" ]; then
     cp .env.example .env
     success ".env creado desde .env.example"
-  else
-    warn "No se encontró .env.example — asegúrate de configurar .env manualmente."
-  fi
 else
-  info ".env ya existe, se omite la copia."
+    info ".env ya existe, se omite."
 fi
 
 # ---------------------------------------------------------------------------
-# 4. Instalar dependencias con un contenedor temporal de PHP+Composer
-#    (no requiere PHP ni Composer instalados en el host)
+# 4. Instalar dependencias PHP con contenedor temporal (sin PHP local)
 # ---------------------------------------------------------------------------
+step "── 3. Instalando dependencias PHP ─────────────────────────"
 if [ ! -d "vendor" ]; then
-  info "Instalando dependencias PHP con Composer (contenedor temporal)..."
-  docker run --rm \
-    --pull=missing \
-    -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php84-composer:latest \
-    composer install --ignore-platform-reqs --no-interaction --prefer-dist
-  success "Dependencias instaladas."
+    info "Descargando imagen PHP+Composer (primera vez puede tardar)..."
+    MSYS_NO_PATHCONV=1 docker run --rm \
+        --pull=missing \
+        -v "$(pwd -W)://var/www/html" \
+        -w //var/www/html \
+        laravelsail/php84-composer:latest \
+        composer install --ignore-platform-reqs --no-interaction --prefer-dist --quiet
+    success "Dependencias instaladas."
 else
-  info "vendor/ ya existe, se omite composer install."
+    info "vendor/ ya existe, se omite composer install."
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Publicar el compose.yaml de Sail si no existe
+# 5. Generar APP_KEY si está vacía
 # ---------------------------------------------------------------------------
-if [ ! -f "compose.yaml" ] && [ ! -f "docker-compose.yml" ]; then
-  info "Publicando configuración de Sail (servicios: $SAIL_SERVICES)..."
-  docker run --rm \
-    --pull=missing \
-    -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php84-composer:latest \
-    php artisan sail:install --with="$SAIL_SERVICES" --no-interaction
-  success "compose.yaml de Sail publicado."
-else
-  info "compose.yaml ya existe, se omite sail:install."
-fi
-
-# ---------------------------------------------------------------------------
-# 6. Generar APP_KEY si está vacía
-# ---------------------------------------------------------------------------
-APP_KEY_VALUE=$(grep -E '^APP_KEY=' .env | cut -d '=' -f2)
+step "── 4. APP_KEY ──────────────────────────────────────────────"
+APP_KEY_VALUE=$(grep -E '^APP_KEY=' .env | cut -d '=' -f2-)
 if [ -z "$APP_KEY_VALUE" ]; then
-  info "Generando APP_KEY..."
-  docker run --rm \
-    -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php84-composer:latest \
-    php artisan key:generate --force
-  success "APP_KEY generada."
+    info "Generando APP_KEY..."
+    MSYS_NO_PATHCONV=1 docker run --rm \
+        -v "$(pwd -W)://var/www/html" \
+        -w //var/www/html \
+        laravelsail/php84-composer:latest \
+        php artisan key:generate --force --quiet
+    success "APP_KEY generada."
 else
-  info "APP_KEY ya está configurada, se omite."
+    info "APP_KEY ya configurada, se omite."
 fi
 
 # ---------------------------------------------------------------------------
-# 7. Levantar Sail
+# 6. Levantar contenedores con docker compose
+#    (sail no es compatible con Git Bash / MINGW64)
 # ---------------------------------------------------------------------------
-info "Levantando contenedores con Sail..."
-./vendor/bin/sail up -d
+step "── 5. Levantando contenedores ─────────────────────────────"
+info "Iniciando Laravel + PostgreSQL (primera vez puede tardar)..."
+WWWUSER=0 WWWGROUP=0 docker compose up -d
 success "Contenedores levantados."
 
+# ---------------------------------------------------------------------------
+# 7. Esperar a que PostgreSQL esté listo
+# ---------------------------------------------------------------------------
+step "── 6. Esperando a PostgreSQL ───────────────────────────────"
+info "Esperando que la base de datos esté lista..."
+
+DB_USER=$(grep -E '^DB_USERNAME=' .env | cut -d '=' -f2-)
+DB_NAME=$(grep -E '^DB_DATABASE=' .env  | cut -d '=' -f2-)
+
+RETRIES=20
+until docker compose exec -T pgsql pg_isready -q -U "$DB_USER" -d "$DB_NAME" 2>/dev/null; do
+    RETRIES=$((RETRIES - 1))
+    if [ "$RETRIES" -le 0 ]; then
+        error "PostgreSQL no respondió a tiempo. Revisa: docker compose logs pgsql"
+    fi
+    echo -n "."
+    sleep 2
+done
+echo ""
+success "PostgreSQL listo."
+
+# ---------------------------------------------------------------------------
+# 8. Ejecutar migraciones
+# ---------------------------------------------------------------------------
+step "── 7. Migraciones ──────────────────────────────────────────"
+docker compose exec -T laravel.test php artisan migrate --force
+success "Migraciones ejecutadas."
+
+# ---------------------------------------------------------------------------
+# 9. Ejecutar seeders (roles: Admin, Empresa, Cliente)
+# ---------------------------------------------------------------------------
+step "── 8. Seeders ──────────────────────────────────────────────"
+docker compose exec -T laravel.test php artisan db:seed --force
+success "Roles insertados (Admin, Empresa, Cliente)."
 
 # ---------------------------------------------------------------------------
 # 10. Resumen final
 # ---------------------------------------------------------------------------
 echo ""
-echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  Proyecto listo en http://localhost${NC}"
-echo -e "${GREEN}============================================${NC}"
+echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}${BOLD}║   La Cuponera SV está lista                  ║${NC}"
+echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  Detener:    ${CYAN}./vendor/bin/sail stop${NC}"
-echo -e "  Reiniciar:  ${CYAN}./vendor/bin/sail up -d${NC}"
-echo -e "  Artisan:    ${CYAN}./vendor/bin/sail artisan <comando>${NC}"
-echo -e "  Shell:      ${CYAN}./vendor/bin/sail shell${NC}"
+echo -e "  ${BOLD}App:${NC}        http://localhost"
+echo -e "  ${BOLD}Registro:${NC}   http://localhost/empresa/registro"
+echo -e "  ${BOLD}Login:${NC}      http://localhost/login"
+echo ""
+echo -e "  ${BOLD}Comandos útiles:${NC}"
+echo -e "    ${CYAN}docker compose stop${NC}                                    — Detener"
+echo -e "    ${CYAN}WWWUSER=0 WWWGROUP=0 docker compose up -d${NC}             — Volver a levantar"
+echo -e "    ${CYAN}docker compose exec laravel.test php artisan migrate${NC}   — Re-migrar"
+echo -e "    ${CYAN}docker compose exec laravel.test php artisan tinker${NC}    — Consola interactiva"
+echo -e "    ${CYAN}docker compose logs -f${NC}                                 — Ver logs"
+echo -e "    ${CYAN}docker compose exec laravel.test bash${NC}                  — Shell del contenedor"
+echo ""
+echo -e "  ${YELLOW}Tip:${NC} Para aprobar tu empresa en la BD:"
+echo -e "    ${CYAN}docker compose exec laravel.test php artisan tinker${NC}"
+echo -e "    >>> App\Models\Empresa::first()->update(['estado_solicitud'=>'Aprobada']);"
 echo ""
