@@ -25,6 +25,28 @@ error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 step()    { echo -e "\n${BOLD}$1${NC}"; }
 
 # ---------------------------------------------------------------------------
+# Detección de sistema operativo
+#   - En Git Bash / MSYS / Cygwin (Windows) necesitamos `pwd -W` para obtener
+#     la ruta estilo Windows (C:/...) y la ruta del contenedor con doble barra
+#     (//var/www/html) para evitar que MSYS la traduzca.
+#   - En Linux y macOS usamos `pwd` normal, una sola barra y además pasamos
+#     --user para que los archivos generados no queden como root.
+# ---------------------------------------------------------------------------
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        export MSYS_NO_PATHCONV=1
+        HOST_PWD_CMD="pwd -W"
+        CONTAINER_PATH="//var/www/html"
+        DOCKER_USER_ARGS=()
+        ;;
+    *)
+        HOST_PWD_CMD="pwd"
+        CONTAINER_PATH="/var/www/html"
+        DOCKER_USER_ARGS=(--user "$(id -u):$(id -g)")
+        ;;
+esac
+
+# ---------------------------------------------------------------------------
 # 1. Verificar que Docker esté disponible y corriendo
 # ---------------------------------------------------------------------------
 step "── 1. Verificando Docker ──────────────────────────────────"
@@ -56,12 +78,15 @@ fi
 step "── 3. Instalando dependencias PHP ─────────────────────────"
 if [ ! -d "vendor" ]; then
     info "Descargando imagen PHP+Composer (primera vez puede tardar)..."
-    MSYS_NO_PATHCONV=1 docker run --rm \
+    docker run --rm \
         --pull=missing \
-        -v "$(pwd -W)://var/www/html" \
-        -w //var/www/html \
+        "${DOCKER_USER_ARGS[@]}" \
+        -e HOME=/tmp \
+        -e COMPOSER_HOME=/tmp/.composer \
+        -v "$($HOST_PWD_CMD):$CONTAINER_PATH" \
+        -w "$CONTAINER_PATH" \
         laravelsail/php84-composer:latest \
-        composer install --ignore-platform-reqs --no-interaction --prefer-dist --quiet
+        composer install --ignore-platform-reqs --no-interaction --prefer-dist
     success "Dependencias instaladas."
 else
     info "vendor/ ya existe, se omite composer install."
@@ -74,11 +99,14 @@ step "── 4. APP_KEY ──────────────────�
 APP_KEY_VALUE=$(grep -E '^APP_KEY=' .env | cut -d '=' -f2-)
 if [ -z "$APP_KEY_VALUE" ]; then
     info "Generando APP_KEY..."
-    MSYS_NO_PATHCONV=1 docker run --rm \
-        -v "$(pwd -W)://var/www/html" \
-        -w //var/www/html \
+    docker run --rm \
+        "${DOCKER_USER_ARGS[@]}" \
+        -e HOME=/tmp \
+        -e COMPOSER_HOME=/tmp/.composer \
+        -v "$($HOST_PWD_CMD):$CONTAINER_PATH" \
+        -w "$CONTAINER_PATH" \
         laravelsail/php84-composer:latest \
-        php artisan key:generate --force --quiet
+        php artisan key:generate --force
     success "APP_KEY generada."
 else
     info "APP_KEY ya configurada, se omite."

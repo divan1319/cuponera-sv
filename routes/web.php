@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\StoreController;
 
-<<<<<<< kev
+
 // Registro
 Route::post('/register', [RegisterController::class, 'register']);
 
@@ -16,7 +16,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/catalog', [StoreController::class, 'catalog']);
 Route::post('/cart/add/{id}', [StoreController::class, 'addToCart']);
 Route::post('/cart/checkout', [StoreController::class, 'checkout'])->middleware('auth');
-=======
+
 Route::get('/', fn () => redirect()->route('login'));
 
 // Autenticación
@@ -39,4 +39,4 @@ Route::middleware(['auth', 'es.empresa'])->prefix('empresa')->name('empresa.')->
         Route::patch('/cupones/{id}/canjear', [CuponController::class, 'canjear'])->name('cupones.canjear');
     });
 });
->>>>>>> main
+
