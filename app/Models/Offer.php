@@ -11,20 +11,8 @@ class Offer extends Model
 
     protected $fillable = [
         'title',
-        'description',
-        'original_price',
-        'discount_price',
-        'start_date',
-        'end_date',
+        'price',
         'stock',
-        'status',
-        'image_url',
-    ];
-
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'original_price' => 'decimal:2',
-        'discount_price' => 'decimal:2',
+        'expires_at',
     ];
 }
