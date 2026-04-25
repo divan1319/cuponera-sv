@@ -11,11 +11,10 @@ return new class extends Migration
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('description');
-            $table->decimal('original_price', 8, 2);
-            $table->decimal('discount_price', 8, 2);
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->text('description')->nullable();
+            $table->decimal('price', 8, 2);
+            $table->decimal('original_price', 8, 2)->nullable();
+            $table->timestamp('expires_at');
             $table->integer('stock');
             $table->enum('status', ['active', 'expired', 'sold_out'])->default('active');
             $table->string('image_url')->nullable();

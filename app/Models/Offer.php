@@ -11,8 +11,12 @@ class Offer extends Model
 
     protected $fillable = [
         'title',
+        'description',
         'price',
+        'original_price',
         'stock',
         'expires_at',
+        'status',
+        'image_url',
     ];
 }
