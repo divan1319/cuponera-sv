@@ -4,8 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CuponController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\OfertaController;
+use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\StoreController;
 
 
