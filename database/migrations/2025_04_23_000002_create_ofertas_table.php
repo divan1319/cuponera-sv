@@ -15,7 +15,7 @@ return new class extends Migration
             $table->decimal('precio_regular', 10, 2);
             $table->decimal('precio_oferta', 10, 2);
             $table->timestamp('fecha_inicio');
-            $table->timestamp('fecha_fin');
+            $table->timestamp('fecha_fin')->nullable();
             $table->date('fecha_limite_canje');
             $table->integer('cantidad_limite')->nullable();
             $table->text('descripcion');
