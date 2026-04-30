@@ -18,7 +18,7 @@ class OfertaController extends Controller
         $ofertas = $this->empresaActual()
             ->ofertas()
             ->orderByDesc('fecha_creacion')
-            ->withCount('cupones')
+            ->withCount('cuponesComprados')
             ->get();
 
         return view('empresa.ofertas.index', compact('ofertas'));

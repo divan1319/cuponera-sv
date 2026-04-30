@@ -2,19 +2,22 @@
 @section('title', 'La Cuponera SV')
 
 @section('content')
-<div class="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-2xl font-black text-blue-700">
-        LC
-    </div>
-    <h1 class="mt-5 text-3xl font-bold tracking-tight text-slate-950">La Cuponera SV</h1>
-    <p class="mt-3 text-slate-500">
-        Plataforma para registrar empresas, publicar ofertas y administrar cupones.
+<div class="mx-auto mt-12 max-w-4xl text-center">
+    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+        Descubre las mejores <span class="text-blue-600">ofertas</span>
+    </h1>
+    <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
+        La Cuponera SV es la plataforma ideal para encontrar descuentos increíbles y para que las empresas publiquen sus mejores promociones.
     </p>
-    <div class="mt-6 flex flex-wrap justify-center gap-3">
-        <a href="{{ route('login') }}" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+    
+    <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a href="{{ route('login') }}" class="w-full sm:w-auto rounded-full bg-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md">
             Iniciar sesión
         </a>
-        <a href="{{ route('empresa.register') }}" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+        <a href="{{ route('cliente.register') }}" class="w-full sm:w-auto rounded-full bg-white border border-gray-300 px-8 py-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-900">
+            Regístrate como cliente
+        </a>
+        <a href="{{ route('empresa.register') }}" class="w-full sm:w-auto rounded-full bg-white border border-gray-300 px-8 py-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-900">
             Registrar empresa
         </a>
     </div>

@@ -3,87 +3,86 @@
 
 @section('content')
 
-<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+<div class="mb-8 flex flex-wrap items-start justify-between gap-4">
     <div>
-        <h1 class="text-2xl font-bold text-slate-950">{{ $empresa->nombre_empresa }}</h1>
-        <span class="mt-1 block text-sm text-slate-500">
-            {{ Auth::user()->name }} · {{ $empresa->telefono }}
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{ $empresa->nombre_empresa }}</h1>
+        <span class="mt-1.5 block text-sm text-gray-500">
+            {{ Auth::user()->name }} &middot; {{ $empresa->telefono }}
         </span>
     </div>
 
     @if($empresa->estado_solicitud === 'Pendiente')
-        <span class="rounded-full bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800">
+        <span class="inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-sm font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
             Solicitud Pendiente
         </span>
     @elseif($empresa->estado_solicitud === 'Aprobada')
-        <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-semibold text-emerald-800">
+        <span class="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
             Empresa Aprobada
         </span>
     @else
-        <span class="rounded-full bg-red-100 px-3 py-1.5 text-sm font-semibold text-red-800">
+        <span class="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
             Solicitud Rechazada
         </span>
     @endif
 </div>
 
 @if($empresa->estado_solicitud === 'Pendiente')
-    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">
+    <div class="rounded-xl bg-yellow-50 p-4 text-sm text-yellow-800 border border-yellow-100 mb-8">
         Tu solicitud está siendo revisada. Una vez aprobada podrás publicar ofertas y gestionar cupones.
     </div>
 @elseif($empresa->estado_solicitud === 'Rechazada')
-    <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+    <div class="rounded-xl bg-red-50 p-4 text-sm text-red-800 border border-red-100 mb-8">
         Tu solicitud fue rechazada. Contacta al administrador para más información.
     </div>
 @endif
 
 @if($empresa->estado_solicitud === 'Aprobada')
 
-<div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <div class="mx-auto mb-3 h-2 w-10 rounded-full bg-blue-500"></div>
-        <h2 class="text-3xl font-bold text-slate-950">{{ $totalOfertas }}</h2>
-        <p class="mt-1 text-sm text-slate-500">Ofertas Totales</p>
+<div class="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+        <p class="text-sm font-medium text-gray-500">Ofertas Totales</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">{{ $totalOfertas }}</h2>
     </div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <div class="mx-auto mb-3 h-2 w-10 rounded-full bg-emerald-500"></div>
-        <h2 class="text-3xl font-bold text-slate-950">{{ $ofertasDisponibles }}</h2>
-        <p class="mt-1 text-sm text-slate-500">Ofertas Disponibles</p>
+    <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+        <p class="text-sm font-medium text-gray-500">Ofertas Disponibles</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">{{ $ofertasDisponibles }}</h2>
     </div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <div class="mx-auto mb-3 h-2 w-10 rounded-full bg-sky-500"></div>
-        <h2 class="text-3xl font-bold text-slate-950">{{ $cuponesVendidos }}</h2>
-        <p class="mt-1 text-sm text-slate-500">Cupones Vendidos</p>
+    <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+        <p class="text-sm font-medium text-gray-500">Cupones Vendidos</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">{{ $cuponesVendidos }}</h2>
     </div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <div class="mx-auto mb-3 h-2 w-10 rounded-full bg-amber-500"></div>
-        <h2 class="text-3xl font-bold text-slate-950">{{ $cuponesPendientes }}</h2>
-        <p class="mt-1 text-sm text-slate-500">Cupones Sin Canjear</p>
+    <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+        <p class="text-sm font-medium text-gray-500">Cupones Sin Canjear</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900">{{ $cuponesPendientes }}</h2>
     </div>
 </div>
 
-<div class="grid gap-4 md:grid-cols-2">
-    <a href="{{ route('empresa.ofertas.index') }}" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
+<div class="grid gap-5 md:grid-cols-2">
+    <a href="{{ route('empresa.ofertas.index') }}" class="group relative rounded-2xl bg-white p-6 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:border-blue-100">
         <div class="flex items-center gap-4">
-            <div class="rounded-2xl bg-blue-100 px-4 py-3 font-bold text-blue-700">
-                OF
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                </svg>
             </div>
             <div>
-                <h2 class="font-semibold text-slate-950">Gestionar Ofertas</h2>
-                <p class="text-sm text-slate-500">Crear, editar y eliminar ofertas</p>
+                <h2 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Gestionar Ofertas</h2>
+                <p class="text-sm text-gray-500">Crear, editar y eliminar ofertas</p>
             </div>
-            <span class="ml-auto text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-600">→</span>
         </div>
     </a>
-    <a href="{{ route('empresa.cupones.index') }}" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
+    <a href="{{ route('empresa.cupones.index') }}" class="group relative rounded-2xl bg-white p-6 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:border-green-100">
         <div class="flex items-center gap-4">
-            <div class="rounded-2xl bg-emerald-100 px-4 py-3 font-bold text-emerald-700">
-                CP
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+                </svg>
             </div>
             <div>
-                <h2 class="font-semibold text-slate-950">Control de Cupones</h2>
-                <p class="text-sm text-slate-500">Verificar y canjear cupones de clientes</p>
+                <h2 class="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Control de Cupones</h2>
+                <p class="text-sm text-gray-500">Verificar y canjear cupones de clientes</p>
             </div>
-            <span class="ml-auto text-slate-400 transition group-hover:translate-x-1 group-hover:text-emerald-600">→</span>
         </div>
     </a>
 </div>
