@@ -53,6 +53,22 @@
     </div>
 </div>
 @endif
+@if(Auth::user()->rol?->nombre === 'Admin')
+<div class="border-b border-slate-200 bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <nav class="flex flex-wrap gap-2 py-3">
+            <a class="rounded-lg px-3 py-2 text-sm font-medium transition {{ request()->routeIs('admin.solicitudes') ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
+               href="{{ route('admin.solicitudes') }}">
+                Solicitudes
+            </a>
+            <a class="rounded-lg px-3 py-2 text-sm font-medium transition {{ request()->routeIs('admin.reportes') ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
+               href="{{ route('admin.reportes') }}">
+                Reportes
+            </a>
+        </nav>
+    </div>
+</div>
+@endif
 @endauth
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

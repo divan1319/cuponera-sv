@@ -20,11 +20,14 @@ Route::get('/', function () {
 //Route::post('/register', [RegisterController::class, 'register']);
 
 // Rutas para el Administrador
-Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/solicitudes', [AdminController::class, 'listarSolicitudes'])->name('admin.solicitudes');
-    Route::get('/admin/revisar/{id}', [AdminController::class, 'revisar'])->name('admin.revisar');
-    Route::post('/admin/aprobar/{id}', [AdminController::class, 'procesar'])->name('admin.aprobar');
-    Route::get('/admin/reportes', [AdminController::class, 'verReportes'])->name('admin.reportes');
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::middleware('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/solicitudes', [AdminController::class, 'listarSolicitudes'])->name('admin.solicitudes');
+        Route::get('/revisar/{id}', [AdminController::class, 'revisar'])->name('admin.revisar');
+        Route::post('/aprobar/{id}', [AdminController::class, 'procesar'])->name('admin.aprobar');
+        Route::get('/reportes', [AdminController::class, 'verReportes'])->name('admin.reportes');
+    });
 });
 
 // Tienda y Carrito
@@ -52,4 +55,3 @@ Route::middleware(['auth', 'es.empresa'])->prefix('empresa')->name('empresa.')->
         Route::patch('/cupones/{id}/canjear', [CuponController::class, 'canjear'])->name('cupones.canjear');
     });
 });
-

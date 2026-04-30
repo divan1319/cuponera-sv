@@ -31,7 +31,7 @@ class Oferta extends Model
         return $this->belongsTo(Empresa::class, 'id_empresa', 'id_empresa');
     }
 
-    public function cupones()
+    public function cuponesComprados()
     {
         return $this->hasMany(CuponComprado::class, 'id_oferta', 'id_oferta');
     }

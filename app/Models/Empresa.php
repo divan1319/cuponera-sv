@@ -24,4 +24,11 @@ class Empresa extends Model
     {
         return $this->hasMany(Oferta::class, 'id_empresa', 'id_empresa');
     }
+
+    public function cuponesComprados()
+    {
+        return $this->hasManyThrough(CuponComprado::class, Oferta::class, 'id_empresa', 'id_oferta', 'id_empresa', 'id_oferta')
+        ->with('oferta')
+        ->with('ventas');
+    }
 }

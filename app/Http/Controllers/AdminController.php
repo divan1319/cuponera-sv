@@ -7,6 +7,11 @@ use App\Models\Empresa; // <--- IMPORTANTE: Importar el modelo
 
 class AdminController extends Controller
 {
+    public function dashboard()
+    {
+        return view('admin.dashboard');
+    }
+
     /**
      * Muestra el listado de empresas con solicitud pendiente (RF-01)
      */
@@ -51,16 +56,15 @@ public function procesar(Request $request, $id)
 public function verReportes()
 {
     // Obtenemos las empresas aprobadas con sus cupones y ventas
-    // Nota: Ajusta los nombres de las relaciones según tus modelos
     $empresas = Empresa::where('estado_solicitud', 'Aprobada')
-        ->with(['cupones.ventas']) 
+        ->with(['ofertas.cuponesComprados']) 
         ->get();
 
     $reporteData = $empresas->map(function($empresa) {
         $totalVendido = 0;
         
         // Sumamos el precio de cada cupón vendido
-        foreach($empresa->cupones as $cupon) {
+        foreach($empresa->cuponesComprados as $cupon) {
             $totalVendido += $cupon->ventas->count() * $cupon->precio_oferta;
         }
 
@@ -68,7 +72,7 @@ public function verReportes()
 
         return [
             'nombre' => $empresa->nombre_empresa,
-            'cupones_vendidos' => $empresa->cupones->sum(fn($c) => $c->ventas->count()),
+            'cupones_vendidos' => $empresa->cuponesComprados->sum(fn($c) => $c->ventas->count()),
             'total_ingresos' => $totalVendido,
             'comision_ganada' => $gananciaPlataforma
         ];
