@@ -7,10 +7,9 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['id_cliente', 'user_id', 'nombres', 'apellidos', 'dui', 'fecha_nacimiento'])]
-#[Table('clientes')]
-#[Table(key: 'id_cliente')]
+#[Table('clientes', key: 'id_cliente', timestamps: false)]
 class Cliente extends Model{
- 
+  
     public function facturas()
     {
         return $this->hasMany(Factura::class, 'id_cliente', 'id_cliente');

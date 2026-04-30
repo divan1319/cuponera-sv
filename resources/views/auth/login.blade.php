@@ -45,6 +45,11 @@
             ¿Eres empresa y no tienes cuenta?
             <a href="{{ route('empresa.register') }}" class="font-medium text-blue-600 hover:text-blue-700">Regístrate aquí</a>
         </p>
+        <!--Crear enlace para crear cuenta como cliente-->
+        <p class="text-center text-sm text-slate-500">
+            ¿Quieres comprar cupones y no tienes cuenta?
+            <a href="{{ route('cliente.register') }}" class="font-medium text-blue-600 hover:text-blue-700">Regístrate aquí</a>
+        </p>
     </div>
 </div>
 @endsection

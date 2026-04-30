@@ -35,10 +35,17 @@ Route::get('/catalog', [StoreController::class, 'catalog']);
 Route::post('/cart/add/{id}', [StoreController::class, 'addToCart']);
 Route::post('/cart/checkout', [StoreController::class, 'checkout'])->middleware('auth');
 
+// Panel de cliente
+Route::middleware(['auth', 'cliente'])->prefix('cliente')->name('cliente.')->group(function () {
+    Route::get('/dashboard', [ClienteController::class, 'dashboard'])->name('dashboard');
+});
+
 // Autenticación
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/cliente/registro', [ClienteController::class, 'showRegister'])->name('cliente.register');
+    Route::post('/cliente/registro', [ClienteController::class, 'register'])->name('cliente.register.store');
     Route::get('/empresa/registro', [EmpresaController::class, 'showRegister'])->name('empresa.register');
     Route::post('/empresa/registro', [EmpresaController::class, 'register'])->name('empresa.register.store');
 });

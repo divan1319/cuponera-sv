@@ -32,4 +32,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Empresa::class, 'user_id');
     }
+
+    public function cliente()
+    {
+        return $this->hasOne(Cliente::class, 'user_id');
+    }
 }
