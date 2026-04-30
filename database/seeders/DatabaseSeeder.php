@@ -17,5 +17,8 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'Empresa'],
             ['nombre' => 'Cliente'],
         ]);
+        $this->call([
+            AdminSeeder::class,
+        ]);
     }
 }
