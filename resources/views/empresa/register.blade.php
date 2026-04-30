@@ -2,100 +2,88 @@
 @section('title', 'Registro de Empresa — La Cuponera SV')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-7">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white py-3">
-                <h5 class="mb-0"><i class="bi bi-building me-2"></i>Registro de Empresa</h5>
-                <small class="opacity-75">Tu solicitud será revisada y aprobada por un administrador.</small>
-            </div>
-            <div class="card-body p-4">
+@php
+    $inputClass = 'w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100';
+    $errorInputClass = 'border-red-400 focus:border-red-500 focus:ring-red-100';
+@endphp
 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0 ps-3">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+<div class="mx-auto max-w-3xl">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="bg-blue-700 px-6 py-5 text-white">
+            <h1 class="text-xl font-semibold">Registro de Empresa</h1>
+            <p class="mt-1 text-sm text-blue-100">Tu solicitud será revisada y aprobada por un administrador.</p>
+        </div>
+        <div class="p-6">
+            @if ($errors->any())
+                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <ul class="list-disc space-y-1 pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('empresa.register.store') }}">
+                @csrf
+
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Datos del representante</p>
+                <div class="mb-6 grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Nombre completo <span class="text-red-600">*</span></label>
+                        <input type="text" name="name" class="{{ $inputClass }} @error('name') {{ $errorInputClass }} @enderror" value="{{ old('name') }}" required>
+                        @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
-                @endif
-
-                <form method="POST" action="{{ route('empresa.register.store') }}">
-                    @csrf
-
-                    <p class="text-muted small text-uppercase fw-semibold mb-3">Datos del representante</p>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
-                            <input type="text" name="name"
-                                   class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name') }}" required>
-                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
-                            <input type="email" name="email"
-                                   class="form-control @error('email') is-invalid @enderror"
-                                   value="{{ old('email') }}" required>
-                            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Contraseña <span class="text-danger">*</span></label>
-                            <input type="password" name="password" class="form-control" required minlength="8">
-                            <div class="form-text">Mínimo 8 caracteres.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Confirmar contraseña <span class="text-danger">*</span></label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
-                        </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Correo electrónico <span class="text-red-600">*</span></label>
+                        <input type="email" name="email" class="{{ $inputClass }} @error('email') {{ $errorInputClass }} @enderror" value="{{ old('email') }}" required>
+                        @error('email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
-
-                    <hr>
-                    <p class="text-muted small text-uppercase fw-semibold mb-3 mt-3">Datos de la empresa</p>
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Nombre de la empresa <span class="text-danger">*</span></label>
-                            <input type="text" name="nombre_empresa"
-                                   class="form-control @error('nombre_empresa') is-invalid @enderror"
-                                   value="{{ old('nombre_empresa') }}" required>
-                            @error('nombre_empresa')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">NIT <span class="text-danger">*</span></label>
-                            <input type="text" name="nit"
-                                   class="form-control @error('nit') is-invalid @enderror"
-                                   value="{{ old('nit') }}" placeholder="0000-000000-000-0" required>
-                            @error('nit')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Dirección <span class="text-danger">*</span></label>
-                            <input type="text" name="direccion"
-                                   class="form-control @error('direccion') is-invalid @enderror"
-                                   value="{{ old('direccion') }}" required>
-                            @error('direccion')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Teléfono <span class="text-danger">*</span></label>
-                            <input type="text" name="telefono"
-                                   class="form-control @error('telefono') is-invalid @enderror"
-                                   value="{{ old('telefono') }}" placeholder="2222-3333" required>
-                            @error('telefono')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Contraseña <span class="text-red-600">*</span></label>
+                        <input type="password" name="password" class="{{ $inputClass }}" required minlength="8">
+                        <p class="mt-1 text-sm text-slate-500">Mínimo 8 caracteres.</p>
                     </div>
-
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-send me-2"></i>Enviar Solicitud de Registro
-                        </button>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Confirmar contraseña <span class="text-red-600">*</span></label>
+                        <input type="password" name="password_confirmation" class="{{ $inputClass }}" required>
                     </div>
-                </form>
+                </div>
 
-                <hr class="my-3">
-                <p class="text-center text-muted small mb-0">
-                    ¿Ya tienes una cuenta? <a href="{{ route('login') }}" class="text-decoration-none">Inicia sesión</a>
-                </p>
-            </div>
+                <div class="my-6 border-t border-slate-200"></div>
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Datos de la empresa</p>
+                <div class="grid gap-4 md:grid-cols-12">
+                    <div class="md:col-span-8">
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Nombre de la empresa <span class="text-red-600">*</span></label>
+                        <input type="text" name="nombre_empresa" class="{{ $inputClass }} @error('nombre_empresa') {{ $errorInputClass }} @enderror" value="{{ old('nombre_empresa') }}" required>
+                        @error('nombre_empresa')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="mb-1 block text-sm font-medium text-slate-700">NIT <span class="text-red-600">*</span></label>
+                        <input type="text" name="nit" class="{{ $inputClass }} @error('nit') {{ $errorInputClass }} @enderror" value="{{ old('nit') }}" placeholder="0000-000000-000-0" required>
+                        @error('nit')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="md:col-span-8">
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Dirección <span class="text-red-600">*</span></label>
+                        <input type="text" name="direccion" class="{{ $inputClass }} @error('direccion') {{ $errorInputClass }} @enderror" value="{{ old('direccion') }}" required>
+                        @error('direccion')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="mb-1 block text-sm font-medium text-slate-700">Teléfono <span class="text-red-600">*</span></label>
+                        <input type="text" name="telefono" class="{{ $inputClass }} @error('telefono') {{ $errorInputClass }} @enderror" value="{{ old('telefono') }}" placeholder="2222-3333" required>
+                        @error('telefono')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                <button type="submit" class="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200">
+                    Enviar Solicitud de Registro
+                </button>
+            </form>
+
+            <div class="my-5 border-t border-slate-200"></div>
+            <p class="text-center text-sm text-slate-500">
+                ¿Ya tienes una cuenta? <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-700">Inicia sesión</a>
+            </p>
         </div>
     </div>
 </div>

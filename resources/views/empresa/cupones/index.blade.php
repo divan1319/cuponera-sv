@@ -3,25 +3,22 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 fw-bold">
-        <i class="bi bi-ticket-perforated me-2 text-primary"></i>Control de Cupones
-    </h4>
-    <span class="text-muted small">{{ $cupones->total() }} cupón(es) encontrado(s)</span>
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold text-slate-950">Control de Cupones</h1>
+    <span class="text-sm text-slate-500">{{ $cupones->total() }} cupón(es) encontrado(s)</span>
 </div>
 
 {{-- Filtros --}}
-<div class="card shadow-sm border-0 mb-3">
-    <div class="card-body py-3">
-        <form method="GET" class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label form-label-sm mb-1">Buscar por código</label>
-                <input type="text" name="buscar" class="form-control form-control-sm"
+<div class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <form method="GET" class="grid gap-3 md:grid-cols-12 md:items-end">
+            <div class="md:col-span-4">
+                <label class="mb-1 block text-sm font-medium text-slate-700">Buscar por código</label>
+                <input type="text" name="buscar" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                        value="{{ request('buscar') }}" placeholder="Ej: CUP-ABC123">
             </div>
-            <div class="col-md-3">
-                <label class="form-label form-label-sm mb-1">Estado</label>
-                <select name="estado" class="form-select form-select-sm">
+            <div class="md:col-span-3">
+                <label class="mb-1 block text-sm font-medium text-slate-700">Estado</label>
+                <select name="estado" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
                     <option value="">Todos los estados</option>
                     <option value="No Canjeado" {{ request('estado') === 'No Canjeado' ? 'selected' : '' }}>
                         No Canjeado
@@ -31,84 +28,82 @@
                     </option>
                 </select>
             </div>
-            <div class="col-auto">
-                <button class="btn btn-primary btn-sm">
-                    <i class="bi bi-search me-1"></i>Filtrar
+            <div class="flex flex-wrap gap-2 md:col-span-5">
+                <button class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    Filtrar
                 </button>
                 @if(request('buscar') || request('estado'))
-                <a href="{{ route('empresa.cupones.index') }}" class="btn btn-outline-secondary btn-sm ms-1">
-                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                <a href="{{ route('empresa.cupones.index') }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                    Limpiar
                 </a>
                 @endif
             </div>
         </form>
-    </div>
 </div>
 
 @if($cupones->isEmpty())
-    <div class="text-center py-5">
-        <i class="bi bi-ticket-perforated display-1 text-muted"></i>
-        <p class="mt-3 text-muted">No hay cupones que coincidan con los filtros.</p>
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+        <p class="text-slate-500">No hay cupones que coincidan con los filtros.</p>
     </div>
 @else
-<div class="card shadow-sm border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
                 <tr>
-                    <th>Código</th>
-                    <th>Oferta</th>
-                    <th>Precio Pagado</th>
-                    <th>Estado</th>
-                    <th>Fecha de Canje</th>
-                    <th class="text-end">Acción</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-600">Código</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-600">Oferta</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-600">Precio Pagado</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-600">Estado</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-600">Fecha de Canje</th>
+                    <th class="px-4 py-3 text-right font-semibold text-slate-600">Acción</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
                 @foreach($cupones as $cupon)
-                <tr>
-                    <td>
-                        <code class="fs-6 text-dark bg-light px-2 py-1 rounded">
+                <tr class="transition hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        <code class="rounded-lg bg-slate-100 px-2 py-1 text-sm font-semibold text-slate-800">
                             {{ $cupon->codigo_unico }}
                         </code>
                     </td>
-                    <td>
-                        <span class="small">{{ $cupon->oferta->titulo ?? '—' }}</span>
+                    <td class="px-4 py-3 text-slate-700">
+                        {{ $cupon->oferta->titulo ?? '—' }}
                     </td>
-                    <td>
-                        <span class="fw-semibold">${{ number_format($cupon->precio_al_comprar, 2) }}</span>
+                    <td class="px-4 py-3 font-semibold text-slate-950">
+                        ${{ number_format($cupon->precio_al_comprar, 2) }}
                     </td>
-                    <td>
+                    <td class="px-4 py-3">
                         @if($cupon->estado_canje === 'Canjeado')
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                <i class="bi bi-check-circle-fill me-1"></i>Canjeado
+                            <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                Canjeado
                             </span>
                         @else
-                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
-                                <i class="bi bi-clock-fill me-1"></i>No Canjeado
+                            <span class="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                No Canjeado
                             </span>
                         @endif
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-slate-700">
                         @if($cupon->fecha_canje)
-                            <small>{{ \Carbon\Carbon::parse($cupon->fecha_canje)->format('d/m/Y H:i') }}</small>
+                            {{ \Carbon\Carbon::parse($cupon->fecha_canje)->format('d/m/Y H:i') }}
                         @else
-                            <span class="text-muted">—</span>
+                            <span class="text-slate-400">—</span>
                         @endif
                     </td>
-                    <td class="text-end">
+                    <td class="px-4 py-3 text-right">
                         @if($cupon->estado_canje === 'No Canjeado')
                             <form method="POST"
                                   action="{{ route('empresa.cupones.canjear', $cupon->id_cupon) }}"
                                   onsubmit="return confirm('¿Confirmar canje del cupón {{ $cupon->codigo_unico }}?')">
                                 @csrf
                                 @method('PATCH')
-                                <button class="btn btn-sm btn-success">
-                                    <i class="bi bi-check2-circle me-1"></i>Canjear
+                                <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                                    Canjear
                                 </button>
                             </form>
                         @else
-                            <span class="text-muted small">Ya canjeado</span>
+                            <span class="text-sm text-slate-500">Ya canjeado</span>
                         @endif
                     </td>
                 </tr>
@@ -118,7 +113,7 @@
     </div>
 
     @if($cupones->hasPages())
-    <div class="card-footer border-0 bg-white d-flex justify-content-center">
+    <div class="border-t border-slate-200 bg-white px-4 py-3">
         {{ $cupones->withQueryString()->links() }}
     </div>
     @endif
