@@ -30,7 +30,7 @@
                     <td class="px-6 py-4 font-medium text-gray-900">{{ $data['nombre'] }}</td>
                     <td class="px-6 py-4 text-gray-500">{{ $data['cupones_vendidos'] }}</td>
                     <td class="px-6 py-4 text-gray-500">${{ number_format($data['total_ingresos'], 2) }}</td>
-                    <td class="px-6 py-4 text-gray-500">{{-- Buscamos la empresa original para el % --}} %</td> 
+                    <td class="px-6 py-4 text-gray-500">{{ $data['porcentaje_comision'] }} %</td> 
                     <td class="px-6 py-4 font-bold text-green-600">${{ number_format($data['comision_ganada'], 2) }}</td>
                 </tr>
                 @endforeach

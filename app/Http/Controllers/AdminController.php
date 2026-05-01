@@ -74,7 +74,8 @@ public function verReportes()
             'nombre' => $empresa->nombre_empresa,
             'cupones_vendidos' => $empresa->cuponesComprados->sum(fn($c) => $c->ventas->count()),
             'total_ingresos' => $totalVendido,
-            'comision_ganada' => $gananciaPlataforma
+            'comision_ganada' => $gananciaPlataforma,
+            'porcentaje_comision' => $empresa->porcentaje_comision
         ];
     });
 
