@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/ofertas/{id}', [PublicOfertaController::class, 'show'])->name('ofertas.show');
 
 // Registro
 // Route::post('/register', [RegisterController::class, 'register']);

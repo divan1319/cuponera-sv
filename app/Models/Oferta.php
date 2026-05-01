@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Oferta extends Model
 {
     protected $table = 'ofertas';
+
     protected $primaryKey = 'id_oferta';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -19,10 +22,10 @@ class Oferta extends Model
     protected function casts(): array
     {
         return [
-            'fecha_inicio'       => 'datetime',
-            'fecha_fin'          => 'datetime',
+            'fecha_inicio' => 'datetime',
+            'fecha_fin' => 'datetime',
             'fecha_limite_canje' => 'date',
-            'fecha_creacion'     => 'datetime',
+            'fecha_creacion' => 'datetime',
         ];
     }
 
@@ -34,5 +37,20 @@ class Oferta extends Model
     public function cuponesComprados()
     {
         return $this->hasMany(CuponComprado::class, 'id_oferta', 'id_oferta');
+    }
+
+    /**
+     * Ofertas que pueden verse en el sitio público (misma lógica que la portada).
+     */
+    public function scopeVisiblesEnCatalogo(Builder $query): Builder
+    {
+        return $query
+            ->where('estado', 'Disponible')
+            ->whereHas('empresa', fn ($q) => $q->where('estado_solicitud', 'Aprobada'))
+            ->where('fecha_inicio', '<=', now())
+            ->where(function ($q) {
+                $q->whereNull('fecha_fin')
+                    ->orWhere('fecha_fin', '>=', now());
+            });
     }
 }
