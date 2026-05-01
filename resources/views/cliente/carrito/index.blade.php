@@ -7,7 +7,7 @@
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Carrito</h1>
-            <p class="mt-1 text-sm text-gray-600">Revisa las cantidades antes de pagar. Máximo 5 cupones por oferta y usuario.</p>
+            <p class="mt-1 text-sm text-gray-600">Revisa las cantidades antes de pagar. Máximo 5 cupones por oferta.</p>
         </div>
         <a href="{{ route('home') }}#ofertas" class="text-sm font-semibold text-blue-600 hover:text-blue-800">Seguir comprando</a>
     </div>

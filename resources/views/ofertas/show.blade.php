@@ -58,7 +58,7 @@
 
     <div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm ring-1 ring-black/5">
         <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">Comprar cupones</h2>
-        <p class="mt-2 text-sm text-gray-600">Máximo 5 cupones por oferta y por usuario (incluye compras anteriores). El pago se simula al finalizar.</p>
+        <p class="mt-2 text-sm text-gray-600">Máximo 5 cupones por oferta.</p>
 
         @guest
             <p class="mt-4 text-sm text-gray-700">
@@ -73,7 +73,7 @@
             @elseif($agotado)
                 <p class="mt-4 text-sm text-red-700">Esta oferta está agotada; no se pueden añadir más cupones.</p>
             @elseif(($maxComprable ?? 0) < 1)
-                <p class="mt-4 text-sm text-amber-800">Ya alcanzaste el máximo de cupones para esta oferta (5 en total por usuario) o no hay cupones disponibles según el stock.</p>
+                <p class="mt-4 text-sm text-amber-800">Ya alcanzaste el máximo de cupones para esta oferta (5 en total por usuario) o no hay cupones disponibles.</p>
             @else
                 <form action="{{ route('cliente.carrito.store') }}" method="POST" class="mt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
                     @csrf
