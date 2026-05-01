@@ -32,22 +32,22 @@ class OfertaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'titulo'             => 'required|string|max:255',
-            'precio_regular'     => 'required|numeric|min:0.01',
-            'precio_oferta'      => 'required|numeric|min:0.01|lt:precio_regular',
-            'fecha_inicio'       => 'required|date',
-            'fecha_fin'          => 'required|date|after:fecha_inicio',
+            'titulo' => 'required|string|max:255',
+            'precio_regular' => 'required|numeric|min:0.01',
+            'precio_oferta' => 'required|numeric|min:0.01|lt:precio_regular',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
             'fecha_limite_canje' => 'required|date|after_or_equal:fecha_fin',
-            'cantidad_limite'    => 'nullable|integer|min:1',
-            'descripcion'        => 'required|string',
+            'cantidad_limite' => 'nullable|integer|min:1',
+            'descripcion' => 'required|string',
         ], [
-            'precio_oferta.lt'         => 'El precio de oferta debe ser menor al precio regular.',
-            'fecha_fin.after'          => 'La fecha de fin debe ser posterior a la de inicio.',
+            'precio_oferta.lt' => 'El precio de oferta debe ser menor al precio regular.',
+            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la de inicio.',
             'fecha_limite_canje.after_or_equal' => 'La fecha límite de canje debe ser igual o posterior a la fecha de fin.',
         ]);
 
         $data['id_empresa'] = $this->empresaActual()->id_empresa;
-        $data['estado']     = 'Disponible';
+        $data['estado'] = 'Disponible';
 
         Oferta::create($data);
 
@@ -58,6 +58,7 @@ class OfertaController extends Controller
     public function edit(string $id)
     {
         $oferta = $this->empresaActual()->ofertas()->findOrFail($id);
+
         return view('empresa.ofertas.edit', compact('oferta'));
     }
 
@@ -66,18 +67,18 @@ class OfertaController extends Controller
         $oferta = $this->empresaActual()->ofertas()->findOrFail($id);
 
         $data = $request->validate([
-            'titulo'             => 'required|string|max:255',
-            'precio_regular'     => 'required|numeric|min:0.01',
-            'precio_oferta'      => 'required|numeric|min:0.01|lt:precio_regular',
-            'fecha_inicio'       => 'required|date',
-            'fecha_fin'          => 'required|date|after:fecha_inicio',
+            'titulo' => 'required|string|max:255',
+            'precio_regular' => 'required|numeric|min:0.01',
+            'precio_oferta' => 'required|numeric|min:0.01|lt:precio_regular',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
             'fecha_limite_canje' => 'required|date|after_or_equal:fecha_fin',
-            'cantidad_limite'    => 'nullable|integer|min:1',
-            'descripcion'        => 'required|string',
-            'estado'             => 'required|in:Disponible,No Disponible',
+            'cantidad_limite' => 'nullable|integer|min:1',
+            'descripcion' => 'required|string',
+            'estado' => 'required|in:Disponible,No Disponible',
         ], [
-            'precio_oferta.lt'         => 'El precio de oferta debe ser menor al precio regular.',
-            'fecha_fin.after'          => 'La fecha de fin debe ser posterior a la de inicio.',
+            'precio_oferta.lt' => 'El precio de oferta debe ser menor al precio regular.',
+            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la de inicio.',
             'fecha_limite_canje.after_or_equal' => 'La fecha límite de canje debe ser igual o posterior a la fecha de fin.',
         ]);
 
@@ -87,11 +88,11 @@ class OfertaController extends Controller
             ->with('success', 'Oferta actualizada exitosamente.');
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        $oferta = $this->empresaActual()->ofertas()->findOrFail($id);
+        $oferta = Oferta::query()->findOrFail($id);
 
-        if ($oferta->cupones()->exists()) {
+        if ($oferta->cuponesComprados()->exists()) {
             return back()->with('error', 'No se puede eliminar una oferta con cupones vendidos.');
         }
 

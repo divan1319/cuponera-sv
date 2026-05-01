@@ -2,22 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CuponController;
-use App\Http\Controllers\EmpresaController;
-use App\Http\Controllers\OfertaController;
-//use App\Http\Controllers\RegisterController;
+// use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StoreController;
-use App\Http\Controllers\AdminController;
 
-// Redirección inicial
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', HomeController::class)->name('home');
 
 // Registro
-//Route::post('/register', [RegisterController::class, 'register']);
+// Route::post('/register', [RegisterController::class, 'register']);
 
 // Rutas para el Administrador
 Route::middleware(['auth'])->prefix('admin')->group(function () {
@@ -29,11 +20,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/reportes', [AdminController::class, 'verReportes'])->name('admin.reportes');
     });
 });
-
-// Tienda y Carrito
-Route::get('/catalog', [StoreController::class, 'catalog']);
-Route::post('/cart/add/{id}', [StoreController::class, 'addToCart']);
-Route::post('/cart/checkout', [StoreController::class, 'checkout'])->middleware('auth');
 
 // Panel de cliente
 Route::middleware(['auth', 'cliente'])->prefix('cliente')->name('cliente.')->group(function () {
