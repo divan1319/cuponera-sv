@@ -63,16 +63,16 @@ public function verReportes()
     $reporteData = $empresas->map(function($empresa) {
         $totalVendido = 0;
         
-        // Sumamos el precio de cada cupón vendido
-        foreach($empresa->ofertas->cuponesComprados as $cupon) {
-            $totalVendido += $cupon->cuponesComprados->count() * $cupon->precio_oferta;
+        // Por cada oferta: unidades vendidas × precio (cupones están en oferta.cuponesComprados)
+        foreach ($empresa->ofertas as $oferta) {
+            $totalVendido += $oferta->cuponesComprados->count() * $oferta->precio_oferta;
         }
 
         $gananciaPlataforma = $totalVendido * ($empresa->porcentaje_comision / 100);
 
         return [
             'nombre' => $empresa->nombre_empresa,
-            'cupones_vendidos' => $empresa->cuponesComprados->sum(fn($c) => $c->ventas->count()),
+            'cupones_vendidos' => $empresa->ofertas->sum(fn ($o) => $o->cuponesComprados->count()),
             'total_ingresos' => $totalVendido,
             'comision_ganada' => $gananciaPlataforma,
             'porcentaje_comision' => $empresa->porcentaje_comision
