@@ -56,6 +56,48 @@
         </div>
     </header>
 
+    <div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm ring-1 ring-black/5">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">Comprar cupones</h2>
+        <p class="mt-2 text-sm text-gray-600">Máximo 5 cupones por oferta y por usuario (incluye compras anteriores). El pago se simula al finalizar.</p>
+
+        @guest
+            <p class="mt-4 text-sm text-gray-700">
+                <a href="{{ route('login') }}" class="font-semibold text-blue-600 hover:text-blue-800">Inicia sesión</a>
+                con una cuenta cliente para añadir al carrito.
+                ¿No tienes cuenta?
+                <a href="{{ route('cliente.register') }}" class="font-semibold text-blue-600 hover:text-blue-800">Regístrate</a>.
+            </p>
+        @else
+            @if(Auth::user()->rol?->nombre !== 'Cliente')
+                <p class="mt-4 text-sm text-amber-800">Solo las cuentas con rol <strong>Cliente</strong> pueden comprar cupones en la plataforma.</p>
+            @elseif($agotado)
+                <p class="mt-4 text-sm text-red-700">Esta oferta está agotada; no se pueden añadir más cupones.</p>
+            @elseif(($maxComprable ?? 0) < 1)
+                <p class="mt-4 text-sm text-amber-800">Ya alcanzaste el máximo de cupones para esta oferta (5 en total por usuario) o no hay cupones disponibles según el stock.</p>
+            @else
+                <form action="{{ route('cliente.carrito.store') }}" method="POST" class="mt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
+                    @csrf
+                    <input type="hidden" name="id_oferta" value="{{ $oferta->id_oferta }}">
+                    <div>
+                        <label for="cantidad-oferta" class="mb-1 block text-sm font-medium text-gray-700">Cantidad</label>
+                        <select name="cantidad" id="cantidad-oferta" class="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            @for($i = 1; $i <= $maxComprable; $i++)
+                                <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Puedes añadir hasta {{ $maxComprable }} ahora.</p>
+                    </div>
+                    <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Añadir al carrito
+                    </button>
+                </form>
+                @error('cantidad')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            @endif
+        @endguest
+    </div>
+
     <div class="mt-8 grid gap-6 sm:grid-cols-2">
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 class="text-xs font-bold uppercase tracking-wider text-gray-400">Vigencia de la oferta</h2>

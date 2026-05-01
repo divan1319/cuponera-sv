@@ -28,7 +28,7 @@
                     <th class="px-4 py-3 text-left font-semibold text-slate-600">Precio Oferta</th>
                     <th class="px-4 py-3 text-left font-semibold text-slate-600">Vigencia</th>
                     <th class="px-4 py-3 text-left font-semibold text-slate-600">Límite Canje</th>
-                    <th class="px-4 py-3 text-center font-semibold text-slate-600">Cupones</th>
+                    <th class="px-4 py-3 text-center font-semibold text-slate-600">Cupones Vendidos</th>
                     <th class="px-4 py-3 text-left font-semibold text-slate-600">Estado</th>
                     <th class="px-4 py-3 text-right font-semibold text-slate-600">Acciones</th>
                 </tr>
@@ -56,7 +56,7 @@
                         {{ \Carbon\Carbon::parse($oferta->fecha_limite_canje)->format('d/m/Y') }}
                     </td>
                     <td class="px-4 py-3 text-center">
-                        <span class="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-800">{{ $oferta->cupones_count }}</span>
+                        <span class="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-800">{{ $oferta->cuponesComprados()->count() }}</span>
                     </td>
                     <td class="px-4 py-3">
                         @if($oferta->estado === 'Disponible')

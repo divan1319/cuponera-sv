@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class CuponComprado extends Model
 {
     protected $table = 'cupones_comprados';
+
     protected $primaryKey = 'id_cupon';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -20,6 +22,11 @@ class CuponComprado extends Model
         return [
             'fecha_canje' => 'datetime',
         ];
+    }
+
+    public function factura()
+    {
+        return $this->belongsTo(Factura::class, 'id_factura', 'id_factura');
     }
 
     public function oferta()

@@ -15,7 +15,19 @@
             La Cuponera <span class="text-blue-600">SV</span>
         </a>
         @auth
-        <div class="flex items-center gap-4">
+        <div class="flex flex-1 flex-wrap items-center justify-end gap-4 sm:gap-6">
+            @if(Auth::user()->rol?->nombre === 'Cliente')
+                @php
+                    $uds = array_sum(session(\App\Services\CarritoService::SESSION_KEY, []));
+                @endphp
+                <a href="{{ route('cliente.carrito.index') }}"
+                   class="relative text-sm font-semibold text-blue-600 transition hover:text-blue-800">
+                    Carrito
+                    @if($uds > 0)
+                        <span class="absolute -right-2.5 -top-2 min-w-[1.125rem] rounded-full bg-blue-600 px-1 text-center text-[10px] font-bold text-white">{{ $uds > 9 ? '9+' : $uds }}</span>
+                    @endif
+                </a>
+            @endif
             <span class="text-sm font-medium text-gray-600">
                 {{ Auth::user()->name }}
             </span>
@@ -26,69 +38,77 @@
                 </button>
             </form>
         </div>
+        @else
+        <div></div>
         @endauth
     </div>
 </nav>
 
 @auth
-@if(Auth::user()->rol?->nombre === 'Empresa')
-<div class="bg-white border-b border-gray-200">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <nav class="flex gap-6 py-3 overflow-x-auto">
-            <a class="text-sm font-medium transition {{ request()->routeIs('empresa.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('empresa.dashboard') }}">
-                Dashboard
-            </a>
-            @if(Auth::user()->empresa?->estado_solicitud === 'Aprobada')
-            <a class="text-sm font-medium transition {{ request()->routeIs('empresa.ofertas.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('empresa.ofertas.index') }}">
-                Mis Ofertas
-            </a>
-            <a class="text-sm font-medium transition {{ request()->routeIs('empresa.cupones.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('empresa.cupones.index') }}">
-                Cupones
-            </a>
-            @endif
-        </nav>
-    </div>
-</div>
-@endif
-@if(Auth::user()->rol?->nombre === 'Admin')
-<div class="bg-white border-b border-gray-200">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <nav class="flex gap-6 py-3 overflow-x-auto">
-            <a class="text-sm font-medium transition {{ request()->routeIs('admin.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('admin.dashboard') }}">
-                Dashboard
-            </a>
-            <a class="text-sm font-medium transition {{ request()->routeIs('admin.solicitudes') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('admin.solicitudes') }}">
-                Solicitudes
-            </a>
-            <a class="text-sm font-medium transition {{ request()->routeIs('admin.reportes') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-               href="{{ route('admin.reportes') }}">
-                Reportes
-            </a>
-        </nav>
-    </div>
-</div>
-@endif
-@if(Auth::user()->rol?->nombre === 'Cliente')
-<div class="bg-white border-b border-gray-200">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <nav class="flex gap-6 py-3 overflow-x-auto">
-            <a class="text-sm font-medium transition {{ request()->routeIs('home') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-                href="{{ route('home') }}">
-                 Inicio
-             </a>
-            <a class="text-sm font-medium transition {{ request()->routeIs('cliente.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-                href="{{ route('cliente.dashboard') }}">
-                 Dashboard
-             </a>
-        </nav>
-    </div>
-</div>
-@endif
+    @if(Auth::user()->rol?->nombre === 'Empresa')
+        <div class="bg-white border-b border-gray-200">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <nav class="flex gap-6 py-3 overflow-x-auto">
+                    <a class="text-sm font-medium transition {{ request()->routeIs('empresa.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('empresa.dashboard') }}">
+                        Dashboard
+                    </a>
+                    @if(Auth::user()->empresa?->estado_solicitud === 'Aprobada')
+                        <a class="text-sm font-medium transition {{ request()->routeIs('empresa.ofertas.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                           href="{{ route('empresa.ofertas.index') }}">
+                            Mis Ofertas
+                        </a>
+                        <a class="text-sm font-medium transition {{ request()->routeIs('empresa.cupones.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                           href="{{ route('empresa.cupones.index') }}">
+                            Cupones
+                        </a>
+                    @endif
+                </nav>
+            </div>
+        </div>
+    @elseif(Auth::user()->rol?->nombre === 'Admin')
+        <div class="bg-white border-b border-gray-200">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <nav class="flex gap-6 py-3 overflow-x-auto">
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.dashboard') }}">
+                        Dashboard
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.solicitudes') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.solicitudes') }}">
+                        Solicitudes
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.reportes') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.reportes') }}">
+                        Reportes
+                    </a>
+                </nav>
+            </div>
+        </div>
+    @elseif(Auth::user()->rol?->nombre === 'Cliente')
+        <div class="bg-white border-b border-gray-200">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <nav class="flex gap-6 py-3 overflow-x-auto">
+                    <a class="text-sm font-medium transition {{ request()->routeIs('home') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('home') }}">
+                        Inicio
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('cliente.dashboard') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('cliente.dashboard') }}">
+                        Dashboard
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('cliente.cupones.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('cliente.cupones.index') }}">
+                        Mis cupones
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('cliente.carrito.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('cliente.carrito.index') }}">
+                        Carrito
+                    </a>
+                </nav>
+            </div>
+        </div>
+    @endif
 @endauth
 
 <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

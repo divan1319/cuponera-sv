@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Oferta;
+use App\Services\CarritoService;
+use Illuminate\Support\Facades\Auth;
 
 class PublicOfertaController extends Controller
 {
-    public function show(string $id)
+    public function show(string $id, CarritoService $carrito)
     {
         $oferta = Oferta::query()
             ->visiblesEnCatalogo()
@@ -22,6 +24,12 @@ class PublicOfertaController extends Controller
             ->withCount('cuponesComprados')
             ->firstOrFail();
 
-        return view('ofertas.show', compact('oferta'));
+        $maxComprable = null;
+        $user = Auth::user();
+        if ($user && $user->rol?->nombre === 'Cliente' && $user->cliente) {
+            $maxComprable = $carrito->cantidadMaximaPermitidaEnCarrito($user->cliente, $oferta);
+        }
+
+        return view('ofertas.show', compact('oferta', 'maxComprable'));
     }
 }

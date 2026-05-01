@@ -64,8 +64,8 @@ public function verReportes()
         $totalVendido = 0;
         
         // Sumamos el precio de cada cupón vendido
-        foreach($empresa->cuponesComprados as $cupon) {
-            $totalVendido += $cupon->ventas->count() * $cupon->precio_oferta;
+        foreach($empresa->ofertas->cuponesComprados as $cupon) {
+            $totalVendido += $cupon->cuponesComprados->count() * $cupon->precio_oferta;
         }
 
         $gananciaPlataforma = $totalVendido * ($empresa->porcentaje_comision / 100);

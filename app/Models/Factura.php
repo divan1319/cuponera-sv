@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['id_factura', 'id_cliente', 'fecha_compra', 'total_pagado', 'metodo_pago'])]
-#[Table('facturas')]
-#[Table(key: 'id_factura')]
-class Factura extends Model{
+#[Table('facturas',key: 'id_factura')]
+class Factura extends Model
+{
+    public $timestamps = false;
 
     public function cliente()
     {
@@ -19,5 +20,5 @@ class Factura extends Model{
     public function cuponesComprados()
     {
         return $this->hasMany(CuponComprado::class, 'id_factura', 'id_factura');
-    } 
+    }
 }

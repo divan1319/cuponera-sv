@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterClienteRequest;
 use App\Models\Cliente;
+use App\Models\CuponComprado;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,20 @@ class ClienteController extends Controller
         return view('cliente.dashboard');
     }
 
+    public function cupones()
+    {
+        $cliente = auth()->user()->cliente;
+        abort_unless($cliente, 403);
+
+        $cupones = CuponComprado::query()
+            ->whereHas('factura', fn ($q) => $q->where('id_cliente', $cliente->id_cliente))
+            ->with(['oferta' => fn ($q) => $q->select('id_oferta', 'titulo')])
+            ->orderByDesc('id_cupon')
+            ->paginate(15);
+
+        return view('cliente.cupones.index', compact('cupones'));
+    }
+
     public function showRegister()
     {
         return view('cliente.register');
@@ -26,22 +41,22 @@ class ClienteController extends Controller
         DB::transaction(function () use ($request) {
             $rolCliente = Rol::where('nombre', 'Cliente')->firstOrFail();
 
-            $nombresCompletos = trim($request->nombres . ' ' . $request->apellidos);
+            $nombresCompletos = trim($request->nombres.' '.$request->apellidos);
 
             $user = User::create([
-                'name'     => $nombresCompletos,
-                'email'    => $request->email,
+                'name' => $nombresCompletos,
+                'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'id_rol'   => $rolCliente->id_rol,
-                'estado'   => 'Activo',
+                'id_rol' => $rolCliente->id_rol,
+                'estado' => 'Activo',
             ]);
 
             Cliente::create([
-                'user_id'            => $user->id,
-                'nombres'            => $request->nombres,
-                'apellidos'          => $request->apellidos,
-                'dui'                => $request->dui,
-                'fecha_nacimiento'   => $request->fecha_nacimiento,
+                'user_id' => $user->id,
+                'nombres' => $request->nombres,
+                'apellidos' => $request->apellidos,
+                'dui' => $request->dui,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
             ]);
         });
 

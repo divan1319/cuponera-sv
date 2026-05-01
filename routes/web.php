@@ -25,6 +25,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 // Panel de cliente
 Route::middleware(['auth', 'cliente'])->prefix('cliente')->name('cliente.')->group(function () {
     Route::get('/dashboard', [ClienteController::class, 'dashboard'])->name('dashboard');
+    Route::get('/cupones', [ClienteController::class, 'cupones'])->name('cupones.index');
+    Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
+    Route::post('/carrito', [CarritoController::class, 'store'])->name('carrito.store');
+    Route::patch('/carrito/{id}', [CarritoController::class, 'update'])->name('carrito.update');
+    Route::delete('/carrito/{id}', [CarritoController::class, 'destroy'])->name('carrito.destroy');
+    Route::post('/carrito/checkout', [CarritoController::class, 'checkout'])->name('carrito.checkout');
 });
 
 // Autenticación
