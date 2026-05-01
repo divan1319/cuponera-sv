@@ -101,6 +101,10 @@
                        href="{{ route('cliente.cupones.index') }}">
                         Mis cupones
                     </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('cliente.facturas.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('cliente.facturas.index') }}">
+                        Mis facturas
+                    </a>
                     <a class="text-sm font-medium transition {{ request()->routeIs('cliente.carrito.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
                        href="{{ route('cliente.carrito.index') }}">
                         Carrito

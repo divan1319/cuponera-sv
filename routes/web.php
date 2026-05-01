@@ -26,6 +26,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 Route::middleware(['auth', 'cliente'])->prefix('cliente')->name('cliente.')->group(function () {
     Route::get('/dashboard', [ClienteController::class, 'dashboard'])->name('dashboard');
     Route::get('/cupones', [ClienteController::class, 'cupones'])->name('cupones.index');
+    Route::get('/facturas', [ClienteController::class, 'facturas'])->name('facturas.index');
+    Route::get('/facturas/{id_factura}/pdf', [ClienteController::class, 'facturaPdf'])->name('facturas.pdf');
+    Route::get('/facturas/{id_factura}', [ClienteController::class, 'facturaShow'])->name('facturas.show');
     Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
     Route::post('/carrito', [CarritoController::class, 'store'])->name('carrito.store');
     Route::patch('/carrito/{id}', [CarritoController::class, 'update'])->name('carrito.update');

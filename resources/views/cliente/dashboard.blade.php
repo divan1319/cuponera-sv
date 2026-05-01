@@ -15,6 +15,12 @@
             <p class="mt-2 text-3xl font-bold text-blue-600">0</p>
             <a href="{{ route('cliente.cupones.index') }}" class="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-500">Ver mis cupones &rarr;</a>
         </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
+            <h3 class="text-lg font-medium text-gray-900">Facturas</h3>
+            <p class="mt-2 text-sm text-gray-500">Historial de compras y comprobantes.</p>
+            <a href="{{ route('cliente.facturas.index') }}" class="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-500">Ver mis facturas &rarr;</a>
+        </div>
         
         <div class="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
             <h3 class="text-lg font-medium text-gray-900">Ofertas Disponibles</h3>
