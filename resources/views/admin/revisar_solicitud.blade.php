@@ -48,14 +48,28 @@
 
         <form action="{{ route('admin.aprobar', $empresa->id_empresa) }}" method="POST">
             @csrf
+
+            @if ($errors->any())
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    <ul class="list-inside list-disc space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="mb-8">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Asignar Porcentaje de Comisión (%)</label>
                 <div class="relative rounded-md shadow-sm">
-                    <input type="number" name="porcentaje_comision" id="porcentaje_comision" step="0.01" min="0" max="100" class="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Ejemplo: 10.50">
+                    <input type="number" name="porcentaje_comision" id="porcentaje_comision" value="{{ old('porcentaje_comision') }}" step="0.01" min="0" max="100" class="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 @error('porcentaje_comision') border-red-500 ring-1 ring-red-500 @enderror" placeholder="Ejemplo: 10.50">
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                         <span class="text-gray-500 sm:text-sm">%</span>
                     </div>
                 </div>
+                @error('porcentaje_comision')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
                 <p class="mt-2 text-sm text-gray-500">Este porcentaje se aplicará a cada cupón vendido por esta empresa.</p>
             </div>
 
@@ -70,15 +84,4 @@
         </form>
     </div>
 </div>
-
-<script>
-    // Validar que la comisión solo sea obligatoria al presionar "Aprobar"
-    document.querySelector('button[value="aprobar"]').addEventListener('click', function(e) {
-        const comision = document.getElementById('porcentaje_comision').value;
-        if (!comision) {
-            e.preventDefault();
-            alert('Por favor, asigna un porcentaje de comisión para aprobar la empresa.');
-        }
-    });
-</script>
 @endsection

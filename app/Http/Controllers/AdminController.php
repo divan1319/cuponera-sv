@@ -2,76 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminActualizarEmpresaRequest;
+use App\Http\Requests\AdminProcesarSolicitudEmpresaRequest;
 use App\Models\Cliente;
-use App\Models\CuponComprado;
 use App\Models\Empresa;
-use App\Models\Factura;
-use App\Models\User;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use App\Services\AdminService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
+    public function __construct(
+        protected AdminService $admin
+    ) {}
+
     public function dashboard(Request $request)
     {
-        $year = max(1970, (int) $request->integer('year', now()->year));
-        $month = min(12, max(1, (int) $request->integer('month', now()->month)));
+        $periodo = $this->admin->resolverPeriodoDashboard(
+            (int) $request->integer('year', now()->year),
+            (int) $request->integer('month', now()->month),
+        );
 
-        $desde = Carbon::createStrict($year, $month, 1)->startOfDay();
-        $hasta = (clone $desde)->copy()->endOfMonth();
+        $comisiones = $this->admin->comisionesPorDiaDelMes($periodo['desde'], $periodo['hasta']);
 
-        $porDia = [];
-        foreach (CarbonPeriod::create($desde->copy()->startOfDay(), $desde->copy()->endOfMonth()) as $fecha) {
-            $porDia[$fecha->toDateString()] = 0.0;
-        }
+        $porDia = $comisiones['por_dia'];
+        $totalMes = $comisiones['total_mes'];
+        $year = $periodo['year'];
+        $month = $periodo['month'];
 
-        $cuponesMes = CuponComprado::query()
-            ->whereHas('factura', fn ($q) => $q->whereBetween('fecha_compra', [$desde, $hasta]))
-            ->with([
-                'factura:id_factura,fecha_compra',
-                'oferta.empresa:id_empresa,porcentaje_comision',
-            ])
-            ->get();
-
-        foreach ($cuponesMes as $cupon) {
-            $factura = $cupon->factura;
-            if (! $factura) {
-                continue;
-            }
-
-            $comisionPct = $cupon->oferta?->empresa?->porcentaje_comision;
-            if ($comisionPct === null) {
-                continue;
-            }
-
-            $diaKey = Carbon::parse($factura->fecha_compra)->toDateString();
-
-            $ganancia = (float) $cupon->precio_al_comprar * ((float) $comisionPct / 100);
-
-            if (! array_key_exists($diaKey, $porDia)) {
-                continue;
-            }
-
-            $porDia[$diaKey] = round($porDia[$diaKey] + $ganancia, 2);
-        }
-
-        $totalMes = round(array_sum($porDia), 2);
-
-        $ultimasCompras = Factura::query()
-            ->with([
-                'cliente',
-                'cuponesComprados.oferta' => fn ($q) => $q->with('empresa:id_empresa,nombre_empresa'),
-            ])
-            ->orderByDesc('fecha_compra')
-            ->limit(10)
-            ->get();
-
-        $fcMin = Factura::query()->min('fecha_compra');
-        $floorYear = $fcMin ? min(Carbon::parse($fcMin)->year, now()->year) : now()->year;
-        $floorYear = max($floorYear, now()->year - 20);
-        $yearChoices = range(now()->year, $floorYear);
+        $ultimasCompras = $this->admin->ultimasFacturasConDetalle(10);
+        $yearChoices = $this->admin->añosDisponiblesParaDashboard();
 
         return view('admin.dashboard', compact(
             'porDia',
@@ -88,7 +47,7 @@ class AdminController extends Controller
      */
     public function listarSolicitudes()
     {
-        $solicitudes = Empresa::where('estado_solicitud', 'Pendiente')->get();
+        $solicitudes = $this->admin->listarSolicitudesPendientes();
 
         return view('admin.solicitudes', compact('solicitudes'));
     }
@@ -100,51 +59,25 @@ class AdminController extends Controller
         return view('admin.revisar_solicitud', compact('empresa'));
     }
 
-    public function procesar(Request $request, $id)
+    public function procesar(AdminProcesarSolicitudEmpresaRequest $request)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = Empresa::findOrFail((int) $request->route('id'));
+        $data = $request->validated();
 
-        if ($request->accion === 'aprobar') {
-            if (! $request->porcentaje_comision) {
-                return redirect()->back()->with('error', 'Debe asignar una comisión para aprobar.');
-            }
-
-            $empresa->update([
-                'estado_solicitud' => 'Aprobada',
-                'porcentaje_comision' => $request->porcentaje_comision,
-            ]);
+        if ($data['accion'] === 'aprobar') {
+            $this->admin->aprobarSolicitudEmpresa($empresa, $data['porcentaje_comision']);
 
             return redirect()->route('admin.solicitudes')->with('success', 'Empresa aprobada');
         }
 
-        $empresa->update(['estado_solicitud' => 'Rechazada']);
+        $this->admin->rechazarSolicitudEmpresa($empresa);
 
         return redirect()->route('admin.solicitudes')->with('error', 'Solicitud rechazada');
     }
 
     public function verReportes()
     {
-        $empresas = Empresa::where('estado_solicitud', 'Aprobada')
-            ->with(['ofertas.cuponesComprados'])
-            ->get();
-
-        $reporteData = $empresas->map(function ($empresa) {
-            $totalVendido = 0;
-
-            foreach ($empresa->ofertas as $oferta) {
-                $totalVendido += $oferta->cuponesComprados->count() * $oferta->precio_oferta;
-            }
-
-            $gananciaPlataforma = $totalVendido * ($empresa->porcentaje_comision / 100);
-
-            return [
-                'nombre' => $empresa->nombre_empresa,
-                'cupones_vendidos' => $empresa->ofertas->sum(fn ($o) => $o->cuponesComprados->count()),
-                'total_ingresos' => $totalVendido,
-                'comision_ganada' => $gananciaPlataforma,
-                'porcentaje_comision' => $empresa->porcentaje_comision,
-            ];
-        });
+        $reporteData = $this->admin->datosReportePorEmpresaAprobada();
 
         return view('admin.reportes', compact('reporteData'));
     }
@@ -152,23 +85,7 @@ class AdminController extends Controller
     public function empresasIndex(Request $request)
     {
         $busqueda = $request->string('q')->trim()->toString();
-
-        $query = Empresa::query()->with('user:id,name,email');
-
-        if ($busqueda !== '') {
-            $query->where(function ($q) use ($busqueda) {
-                $q->where('nombre_empresa', 'like', '%'.$busqueda.'%')
-                    ->orWhere('nit', 'like', '%'.$busqueda.'%');
-            });
-        }
-
-        $empresas = $query
-            ->withCount([
-                'cuponesComprados as ventas_total',
-            ])
-            ->orderBy('nombre_empresa')
-            ->paginate(12)
-            ->withQueryString();
+        $empresas = $this->admin->paginarEmpresasAdministracion($busqueda, 12);
 
         return view('admin.empresas.index', compact('empresas', 'busqueda'));
     }
@@ -176,44 +93,16 @@ class AdminController extends Controller
     public function empresasEdit(int $id)
     {
         $empresa = Empresa::findOrFail($id);
-        $ventasCount = $empresa->cuponesComprados()->count();
+        $ventasCount = $this->admin->contarVentasEmpresa($empresa);
 
         return view('admin.empresas.edit', compact('empresa', 'ventasCount'));
     }
 
-    public function empresasUpdate(Request $request, int $id)
+    public function empresasUpdate(AdminActualizarEmpresaRequest $request)
     {
-        $empresa = Empresa::findOrFail($id);
+        $empresa = $request->empresa();
 
-        $rules = [
-            'nombre_empresa' => ['required', 'string', 'max:150'],
-            'nit' => ['required', 'string', 'max:20', 'unique:empresas,nit,'.$empresa->id_empresa.',id_empresa'],
-            'direccion' => ['required', 'string'],
-            'telefono' => ['required', 'string', 'max:20'],
-        ];
-
-        if ($empresa->estado_solicitud === 'Aprobada') {
-            $rules['porcentaje_comision'] = ['required', 'numeric', 'min:0', 'max:100'];
-        }
-
-        $data = $request->validate($rules);
-
-        if ($empresa->estado_solicitud === 'Aprobada') {
-            $empresa->update([
-                'nombre_empresa' => $data['nombre_empresa'],
-                'nit' => $data['nit'],
-                'direccion' => $data['direccion'],
-                'telefono' => $data['telefono'],
-                'porcentaje_comision' => $data['porcentaje_comision'],
-            ]);
-        } else {
-            $empresa->update([
-                'nombre_empresa' => $data['nombre_empresa'],
-                'nit' => $data['nit'],
-                'direccion' => $data['direccion'],
-                'telefono' => $data['telefono'],
-            ]);
-        }
+        $this->admin->actualizarEmpresaDesdeAdministracion($empresa, $request->validated());
 
         return redirect()->route('admin.empresas.index')->with('success', 'Empresa actualizada correctamente.');
     }
@@ -222,16 +111,11 @@ class AdminController extends Controller
     {
         $empresa = Empresa::findOrFail($id);
 
-        if ($empresa->cuponesComprados()->exists()) {
+        if ($this->admin->empresaTieneVentas($empresa)) {
             return redirect()->back()->with('error', 'No se puede eliminar esta empresa porque ya tiene ventas registradas.');
         }
 
-        DB::transaction(function () use ($empresa) {
-            $userId = $empresa->user_id;
-            $empresa->ofertas()->delete();
-            $empresa->delete();
-            User::where('id', $userId)->delete();
-        });
+        $this->admin->eliminarEmpresaUsuarioYOfertas($empresa);
 
         return redirect()->route('admin.empresas.index')->with('success', 'Empresa eliminada.');
     }
@@ -239,27 +123,7 @@ class AdminController extends Controller
     public function clientesIndex(Request $request)
     {
         $busqueda = $request->string('q')->trim()->toString();
-
-        $query = Cliente::query()->with('user:id,name,email');
-
-        if ($busqueda !== '') {
-            $query->where(function ($q) use ($busqueda) {
-                $q->where('nombres', 'like', '%'.$busqueda.'%')
-                    ->orWhere('apellidos', 'like', '%'.$busqueda.'%')
-                    ->orWhere('dui', 'like', '%'.$busqueda.'%')
-                    ->orWhereHas('user', function ($uq) use ($busqueda) {
-                        $uq->where('name', 'like', '%'.$busqueda.'%')
-                            ->orWhere('email', 'like', '%'.$busqueda.'%');
-                    });
-            });
-        }
-
-        $clientes = $query
-            ->withCount('cuponesComprados')
-            ->orderBy('apellidos')
-            ->orderBy('nombres')
-            ->paginate(15)
-            ->withQueryString();
+        $clientes = $this->admin->paginarClientesAdministracion($busqueda, 15);
 
         return view('admin.clientes.index', compact('clientes', 'busqueda'));
     }
@@ -268,22 +132,12 @@ class AdminController extends Controller
     {
         $cliente = Cliente::with('user')->findOrFail($id);
 
-        $tieneCuponesComprados = CuponComprado::whereHas(
-            'factura',
-            fn ($q) => $q->where('id_cliente', $cliente->id_cliente)
-        )->exists();
+        $metricas = $this->admin->metricasClienteAdministracion($cliente);
 
-        $comprasCount = Factura::where('id_cliente', $cliente->id_cliente)->count();
-
-        $canjeados = CuponComprado::whereHas(
-            'factura',
-            fn ($q) => $q->where('id_cliente', $cliente->id_cliente)
-        )->where('estado_canje', 'Canjeado')->count();
-
-        $noCanjeados = CuponComprado::whereHas(
-            'factura',
-            fn ($q) => $q->where('id_cliente', $cliente->id_cliente)
-        )->where('estado_canje', 'No Canjeado')->count();
+        $tieneCuponesComprados = $metricas['tiene_cupones_comprados'];
+        $comprasCount = $metricas['compras_count'];
+        $canjeados = $metricas['canjeados'];
+        $noCanjeados = $metricas['no_canjeados'];
 
         return view('admin.clientes.show', compact(
             'cliente',
@@ -298,27 +152,14 @@ class AdminController extends Controller
     {
         $cliente = Cliente::findOrFail($id);
 
-        $tieneCuponesComprados = CuponComprado::whereHas(
-            'factura',
-            fn ($q) => $q->where('id_cliente', $cliente->id_cliente)
-        )->exists();
-
-        if ($tieneCuponesComprados) {
+        if ($this->admin->clienteTieneCuponesComprados($cliente)) {
             return redirect()->back()->with(
                 'error',
                 'No se puede eliminar este cliente porque tiene cupones comprados.'
             );
         }
 
-        $cliente->loadMissing('facturas');
-
-        DB::transaction(function () use ($cliente) {
-            foreach ($cliente->facturas as $factura) {
-                $factura->cuponesComprados()->delete();
-                $factura->delete();
-            }
-            User::where('id', $cliente->user_id)->delete();
-        });
+        $this->admin->eliminarClienteFacturasYUsuario($cliente);
 
         return redirect()->route('admin.clientes.index')->with('success', 'Cliente eliminado.');
     }
