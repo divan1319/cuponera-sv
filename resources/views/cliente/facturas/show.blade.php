@@ -18,7 +18,7 @@
     </div>
 
     <div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <dl class="grid gap-4 text-sm sm:grid-cols-2">
+        <dl class="grid gap-4 text-sm sm:grid-cols-3">
             <div>
                 <dt class="font-medium text-gray-500">Cliente</dt>
                 <dd class="mt-1 text-gray-900">{{ Auth::user()->cliente->nombres }} {{ Auth::user()->cliente->apellidos }}</dd>
@@ -26,6 +26,10 @@
             <div>
                 <dt class="font-medium text-gray-500">Método de pago</dt>
                 <dd class="mt-1 text-gray-900">{{ $factura->metodo_pago }}</dd>
+            </div>
+            <div>
+                <dt class="font-medium text-gray-500">Número de tarjeta</dt>
+                <dd class="mt-1 text-gray-900">{{ $factura->numero_tarjeta }}</dd>
             </div>
         </dl>
     </div>

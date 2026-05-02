@@ -32,6 +32,7 @@
     </div>
     <div class="row"><strong>Cliente</strong> {{ Auth::user()->cliente->nombres }} {{ Auth::user()->cliente->apellidos }}</div>
     <div class="row"><strong>Método de pago</strong> {{ $factura->metodo_pago }}</div>
+    <div class="row"><strong>Número de tarjeta</strong> {{ $factura->numero_tarjeta }}</div>
 
     <table>
         <thead>

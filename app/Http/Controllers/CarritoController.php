@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Oferta;
 use App\Services\CarritoService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CarritoController extends Controller
 {
@@ -97,7 +98,7 @@ class CarritoController extends Controller
         abort_unless($request->user()->cliente, 403);
         $this->carrito->eliminarLinea((int) $id);
 
-        return back()->with('success', 'Línea eliminada del carrito.');
+        return back()->with('success', 'Item eliminado del carrito.');
     }
 
     public function checkout(Request $request)
@@ -105,10 +106,26 @@ class CarritoController extends Controller
         $cliente = $request->user()->cliente;
         abort_unless($cliente, 403);
 
-        $factura = $this->carrito->procesarCheckout($cliente);
+        $data = $request->validate([
+            'nombre_titular' => ['required', 'string', 'max:120'],
+            'numero_tarjeta' => ['required', 'string'],
+            'vencimiento' => ['required', 'string', 'regex:/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/'],
+            'cvv' => ['required', 'string', 'regex:/^\d{3,4}$/'],
+        ]);
+
+        $digitos = preg_replace('/\D/', '', $data['numero_tarjeta']);
+        if (strlen($digitos) < 13 || strlen($digitos) > 19) {
+            throw ValidationException::withMessages([
+                'numero_tarjeta' => 'El número de tarjeta debe tener entre 13 y 19 dígitos.',
+            ]);
+        }
+
+        $enmascarado = '**** '.substr($digitos, -4);
+
+        $factura = $this->carrito->procesarCheckout($cliente, $enmascarado);
 
         return redirect()
             ->route('cliente.carrito.index')
-            ->with('success', "Compra realizada. Factura #{$factura->id_factura}. Revisa tus cupones en tu panel.");
+            ->with('success', "Compra realizada. Revisa tus cupones.");
     }
 }

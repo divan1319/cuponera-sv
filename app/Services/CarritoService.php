@@ -135,7 +135,7 @@ class CarritoService
         }
     }
 
-    public function procesarCheckout(Cliente $cliente): Factura
+    public function procesarCheckout(Cliente $cliente, string $numeroTarjetaEnmascarado): Factura
     {
         $lineas = $this->lineas();
         if ($lineas === []) {
@@ -152,7 +152,7 @@ class CarritoService
             ]);
         }
 
-        return DB::transaction(function () use ($lineas, $cliente) {
+        return DB::transaction(function () use ($lineas, $cliente, $numeroTarjetaEnmascarado) {
             $total = 0.0;
             $detalle = [];
 
@@ -175,6 +175,7 @@ class CarritoService
                 'id_cliente' => $cliente->id_cliente,
                 'total_pagado' => $total,
                 'metodo_pago' => 'Tarjeta (Simulada)',
+                'numero_tarjeta' => $numeroTarjetaEnmascarado,
             ]);
 
             foreach ($detalle as $row) {

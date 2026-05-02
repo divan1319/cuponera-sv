@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['id_factura', 'id_cliente', 'fecha_compra', 'total_pagado', 'metodo_pago'])]
+#[Fillable(['id_factura', 'id_cliente', 'fecha_compra', 'total_pagado', 'metodo_pago', 'numero_tarjeta'])]
 #[Table('facturas',key: 'id_factura')]
 class Factura extends Model
 {

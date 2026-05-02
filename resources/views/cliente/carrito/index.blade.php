@@ -59,16 +59,63 @@
             @endforeach
         </div>
 
-        <div class="mt-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-600">Total (simulado)</p>
-                <p class="text-2xl font-extrabold text-gray-900">${{ number_format($total, 2) }}</p>
+        <div class="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="mb-6 flex flex-col gap-4 border-b border-gray-100 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div class="text-left sm:text-right">
+                    <p class="text-sm text-gray-600">Total a pagar</p>
+                    <p class="text-2xl font-extrabold text-gray-900">${{ number_format($total, 2) }}</p>
+                </div>
             </div>
-            <form action="{{ route('cliente.carrito.checkout') }}" method="POST" class="w-full sm:w-auto">
+
+            <form action="{{ route('cliente.carrito.checkout') }}" method="POST" class="space-y-4">
                 @csrf
-                <button type="submit" class="w-full rounded-xl bg-emerald-600 px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto">
-                    Finalizar compra (pago simulado)
-                </button>
+
+                <div>
+                    <label for="nombre_titular" class="mb-1 block text-sm font-medium text-gray-700">Nombre en la tarjeta</label>
+                    <input type="text" name="nombre_titular" id="nombre_titular" value="{{ old('nombre_titular') }}" autocomplete="cc-name"
+                           class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                           placeholder="Como aparece en la tarjeta" required>
+                    @error('nombre_titular')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="numero_tarjeta" class="mb-1 block text-sm font-medium text-gray-700">Número de tarjeta</label>
+                    <input type="text" name="numero_tarjeta" id="numero_tarjeta" value="{{ old('numero_tarjeta') }}" inputmode="numeric" autocomplete="cc-number"
+                           class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono tracking-wide"
+                           placeholder="0000 0000 0000 0000" required maxlength="23">
+                    @error('numero_tarjeta')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="vencimiento" class="mb-1 block text-sm font-medium text-gray-700">Vencimiento</label>
+                        <input type="text" name="vencimiento" id="vencimiento" value="{{ old('vencimiento') }}" autocomplete="cc-exp"
+                               class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                               placeholder="MM / AA" required maxlength="7">
+                        @error('vencimiento')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="cvv" class="mb-1 block text-sm font-medium text-gray-700">CVC / CVV</label>
+                        <input type="password" name="cvv" id="cvv" inputmode="numeric" autocomplete="cc-csc"
+                               class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                               placeholder="•••" required maxlength="4">
+                        @error('cvv')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+                    <button type="submit" class="w-full rounded-xl bg-emerald-600 px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto">
+                        Pagar ${{ number_format($total, 2) }} (simulado)
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -78,3 +125,24 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const card = document.getElementById('numero_tarjeta');
+    const exp = document.getElementById('vencimiento');
+    if (card) {
+        card.addEventListener('input', function () {
+            const digits = this.value.replace(/\D/g, '').slice(0, 19);
+            this.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        });
+    }
+    if (exp) {
+        exp.addEventListener('input', function () {
+            const digits = this.value.replace(/\D/g, '').slice(0, 4);
+            this.value = digits.length <= 2 ? digits : digits.slice(0, 2) + ' / ' + digits.slice(2);
+        });
+    }
+})();
+</script>
+@endpush

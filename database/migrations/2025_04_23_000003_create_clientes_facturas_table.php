@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedInteger('id_cliente');
             $table->timestamp('fecha_compra')->useCurrent();
             $table->decimal('total_pagado', 10, 2);
+            $table->char('numero_tarjeta', 10);
             $table->string('metodo_pago')->default('Tarjeta (Simulada)');
             $table->foreign('id_cliente')->references('id_cliente')->on('clientes');
         });
