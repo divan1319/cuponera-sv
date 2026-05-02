@@ -19,6 +19,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/revisar/{id}', [AdminController::class, 'revisar'])->name('admin.revisar');
         Route::post('/aprobar/{id}', [AdminController::class, 'procesar'])->name('admin.aprobar');
         Route::get('/reportes', [AdminController::class, 'verReportes'])->name('admin.reportes');
+        Route::get('/empresas', [AdminController::class, 'empresasIndex'])->name('admin.empresas.index');
+        Route::get('/empresas/{id}/editar', [AdminController::class, 'empresasEdit'])->whereNumber('id')->name('admin.empresas.edit');
+        Route::put('/empresas/{id}', [AdminController::class, 'empresasUpdate'])->whereNumber('id')->name('admin.empresas.update');
+        Route::delete('/empresas/{id}', [AdminController::class, 'empresasDestroy'])->whereNumber('id')->name('admin.empresas.destroy');
+        Route::get('/clientes', [AdminController::class, 'clientesIndex'])->name('admin.clientes.index');
+        Route::get('/clientes/{id}', [AdminController::class, 'clientesShow'])->whereNumber('id')->name('admin.clientes.show');
+        Route::delete('/clientes/{id}', [AdminController::class, 'clientesDestroy'])->whereNumber('id')->name('admin.clientes.destroy');
     });
 });
 

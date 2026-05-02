@@ -82,6 +82,14 @@
                        href="{{ route('admin.reportes') }}">
                         Reportes
                     </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.empresas.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.empresas.index') }}">
+                        Empresas
+                    </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.clientes.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.clientes.index') }}">
+                        Clientes
+                    </a>
                 </nav>
             </div>
         </div>
