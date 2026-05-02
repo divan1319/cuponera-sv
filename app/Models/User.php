@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -36,5 +36,15 @@ class User extends Authenticatable
     public function cliente()
     {
         return $this->hasOne(Cliente::class, 'user_id');
+    }
+
+    /**
+     * Usuarios con rol Admin y cuenta activa (puede haber más de uno).
+     */
+    public function scopeAdministradores(Builder $query): Builder
+    {
+        return $query
+            ->whereHas('rol', fn (Builder $q) => $q->where('nombre', 'Admin'))
+            ->where('estado', 'Activo');
     }
 }
