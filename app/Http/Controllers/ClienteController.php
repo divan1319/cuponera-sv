@@ -16,7 +16,15 @@ class ClienteController extends Controller
 {
     public function dashboard()
     {
-        return view('cliente.dashboard');
+        $cliente = auth()->user()->cliente;
+        abort_unless($cliente, 403);
+
+        $cuponesActivos = CuponComprado::query()
+            ->where('estado_canje', 'No Canjeado')
+            ->whereHas('factura', fn ($q) => $q->where('id_cliente', $cliente->id_cliente))
+            ->count();
+
+        return view('cliente.dashboard', compact('cuponesActivos'));
     }
 
     public function cupones()

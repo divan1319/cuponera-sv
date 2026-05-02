@@ -24,7 +24,7 @@
                    class="relative text-sm font-semibold text-blue-600 transition hover:text-blue-800">
                     Carrito
                     @if($uds > 0)
-                        <span class="absolute -right-2.5 -top-2 min-w-[1.125rem] rounded-full bg-blue-600 px-1 text-center text-[10px] font-bold text-white">{{ $uds > 9 ? '9+' : $uds }}</span>
+                        <span class="absolute -right-2.5 -top-2 min-w-4.5 rounded-full bg-blue-600 px-1 text-center text-[10px] font-bold text-white">{{ $uds > 9 ? '9+' : $uds }}</span>
                     @endif
                 </a>
             @endif
@@ -104,10 +104,6 @@
                     <a class="text-sm font-medium transition {{ request()->routeIs('cliente.facturas.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
                        href="{{ route('cliente.facturas.index') }}">
                         Mis facturas
-                    </a>
-                    <a class="text-sm font-medium transition {{ request()->routeIs('cliente.carrito.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
-                       href="{{ route('cliente.carrito.index') }}">
-                        Carrito
                     </a>
                 </nav>
             </div>

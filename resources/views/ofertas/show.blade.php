@@ -22,7 +22,7 @@
 
     <header class="mt-6 overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-sm ring-1 ring-black/5">
         @if($descuento !== null && $descuento > 0)
-            <div class="flex justify-end bg-gradient-to-r from-slate-50 to-blue-50/80 px-4 py-2">
+            <div class="flex justify-end bg-linear-to- from-slate-50 to-blue-50/80 px-4 py-2">
                 <span class="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm">-{{ $descuento }}%</span>
             </div>
         @endif
