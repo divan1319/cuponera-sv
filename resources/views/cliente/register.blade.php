@@ -62,7 +62,7 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">DUI</label>
-                        <input type="text" name="dui" class="{{ $inputClass }} @error('dui') {{ $errorInputClass }} @enderror" value="{{ old('dui') }}" placeholder="00000000-0" maxlength="10" required>
+                        <input type="text" name="dui" id="registro-dui" inputmode="numeric" autocomplete="off" class="{{ $inputClass }} @error('dui') {{ $errorInputClass }} @enderror" value="{{ old('dui') }}" placeholder="00000000-0" maxlength="10" required>
                         @error('dui')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -86,3 +86,45 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const el = document.getElementById('registro-dui');
+    if (!el) return;
+
+    function formatDuiDigits(digits) {
+        if (digits.length <= 8) return digits;
+        return digits.slice(0, 8) + '-' + digits.slice(8, 9);
+    }
+
+    function applyMask(raw) {
+        const digits = String(raw).replace(/\D/g, '').slice(0, 9);
+        return formatDuiDigits(digits);
+    }
+
+    el.addEventListener('input', function () {
+        const start = el.selectionStart;
+        const before = el.value;
+        const digitsLeftOfCaret = before.slice(0, start).replace(/\D/g, '').length;
+        el.value = applyMask(el.value);
+        if (digitsLeftOfCaret === 0) {
+            el.setSelectionRange(0, 0);
+            return;
+        }
+        let pos = el.value.length;
+        let seen = 0;
+        for (let i = 0; i < el.value.length; i++) {
+            if (/\d/.test(el.value[i])) seen++;
+            if (seen >= digitsLeftOfCaret) {
+                pos = i + 1;
+                break;
+            }
+        }
+        el.setSelectionRange(pos, pos);
+    });
+
+    el.value = applyMask(el.value);
+})();
+</script>
+@endpush

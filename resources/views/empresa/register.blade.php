@@ -62,7 +62,7 @@
                     </div>
                     <div class="md:col-span-4">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">NIT</label>
-                        <input type="text" name="nit" class="{{ $inputClass }} @error('nit') {{ $errorInputClass }} @enderror" value="{{ old('nit') }}" placeholder="0000-000000-000-0" required>
+                        <input type="text" name="nit" id="registro-nit" inputmode="numeric" autocomplete="off" maxlength="17" class="{{ $inputClass }} @error('nit') {{ $errorInputClass }} @enderror" value="{{ old('nit') }}" placeholder="0000-000000-000-0" required>
                         @error('nit')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div class="md:col-span-8">
@@ -72,7 +72,7 @@
                     </div>
                     <div class="md:col-span-4">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="text" name="telefono" class="{{ $inputClass }} @error('telefono') {{ $errorInputClass }} @enderror" value="{{ old('telefono') }}" placeholder="2222-3333" required>
+                        <input type="text" name="telefono" id="registro-telefono" inputmode="numeric" autocomplete="tel-national" maxlength="9" class="{{ $inputClass }} @error('telefono') {{ $errorInputClass }} @enderror" value="{{ old('telefono') }}" placeholder="2222-3333" required>
                         @error('telefono')<p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -91,3 +91,58 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    function setupDigitMask(el, maxDigits, formatDigits) {
+        if (!el) return;
+
+        function applyMask(raw) {
+            const digits = String(raw).replace(/\D/g, '').slice(0, maxDigits);
+            return formatDigits(digits);
+        }
+
+        el.addEventListener('input', function () {
+            const start = el.selectionStart;
+            const before = el.value;
+            const digitsLeftOfCaret = before.slice(0, start).replace(/\D/g, '').length;
+            el.value = applyMask(el.value);
+            if (digitsLeftOfCaret === 0) {
+                el.setSelectionRange(0, 0);
+                return;
+            }
+            let pos = el.value.length;
+            let seen = 0;
+            for (let i = 0; i < el.value.length; i++) {
+                if (/\d/.test(el.value[i])) seen++;
+                if (seen >= digitsLeftOfCaret) {
+                    pos = i + 1;
+                    break;
+                }
+            }
+            el.setSelectionRange(pos, pos);
+        });
+
+        el.value = applyMask(el.value);
+    }
+
+    function formatNitDigits(d) {
+        if (d.length <= 4) return d;
+        let out = d.slice(0, 4) + '-' + d.slice(4, 10);
+        if (d.length <= 10) return out;
+        out = d.slice(0, 4) + '-' + d.slice(4, 10) + '-' + d.slice(10, 13);
+        if (d.length <= 13) return out;
+        return d.slice(0, 4) + '-' + d.slice(4, 10) + '-' + d.slice(10, 13) + '-' + d.slice(13, 14);
+    }
+
+    function formatTelefonoDigits(d) {
+        if (d.length <= 4) return d;
+        return d.slice(0, 4) + '-' + d.slice(4, 8);
+    }
+
+    setupDigitMask(document.getElementById('registro-nit'), 14, formatNitDigits);
+    setupDigitMask(document.getElementById('registro-telefono'), 8, formatTelefonoDigits);
+})();
+</script>
+@endpush
