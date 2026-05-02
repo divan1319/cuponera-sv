@@ -54,7 +54,7 @@
 
         @if($tieneCuponesComprados)
             <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Esta cuenta tiene cupones comprados; no puede eliminarse desde el administrador.
+                Esta cuenta tiene cupones comprados; no puede eliminarse.
             </div>
         @else
             <div class="mt-6 flex flex-wrap gap-3">

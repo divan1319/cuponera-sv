@@ -29,7 +29,7 @@
         <div>
             <label for="filtro-mes" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Mes</label>
             <select id="filtro-mes" name="month"
-                    class="min-w-[10rem] rounded-lg border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="min-w-40 rounded-lg border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 @foreach($nombresMes as $num => $nombre)
                     <option value="{{ $num }}" @selected((int)$month === (int)$num)>{{ $nombre }}</option>
                 @endforeach
@@ -38,7 +38,7 @@
         <div>
             <label for="filtro-year" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Año</label>
             <select id="filtro-year" name="year"
-                    class="min-w-[8rem] rounded-lg border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    class="min-w-32 rounded-lg border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 @foreach($yearChoices as $y)
                     <option value="{{ $y }}" @selected((int)$year === (int)$y)>{{ $y }}</option>
                 @endforeach
@@ -56,43 +56,48 @@
     </div>
 </div>
 
-<div class="grid gap-8 lg:grid-cols-2 lg:gap-10">
-    <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900">Ganancias día a día</h2>
-        <p class="mt-1 text-sm text-gray-500">Distribución de comisiones cobradas en el mes seleccionado.</p>
-        <div class="mt-6 h-72 relative">
-            <canvas id="chartGanancias" aria-label="Gráfico de ganancias diarias"></canvas>
+<div class="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-10 lg:items-start">
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 md:p-6">
+        <h2 class="text-base font-semibold text-gray-900 sm:text-lg">Ganancias día a día</h2>
+        <p class="mt-1 text-xs text-gray-500 sm:text-sm">Distribución de comisiones cobradas en el mes seleccionado.</p>
+        {{-- Contenedor único para el canvas (Chart.js mide el padre): sin overflow-scroll que robe el ancho al redimensionar grid/flex --}}
+        <div class="relative mt-4 w-full min-w-0 sm:mt-6">
+            <div class="relative isolate mx-auto h-52 min-h-48 w-full min-w-0 sm:h-64 sm:min-h-60 md:h-72">
+                <canvas id="chartGanancias" class="block h-full w-full max-w-full min-w-0" aria-label="Gráfico de ganancias diarias"></canvas>
+            </div>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900">Últimas 10 compras</h2>
-        <p class="mt-1 text-sm text-gray-500">Facturas registradas más recientemente.</p>
+    <section class="min-w-0 overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5 md:p-6">
+        <h2 class="text-base font-semibold text-gray-900 sm:text-lg">Últimas 10 compras</h2>
+        <p class="mt-1 text-xs text-gray-500 sm:text-sm">Facturas registradas más recientemente.</p>
 
         @if($ultimasCompras->isEmpty())
-            <div class="mt-8 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500">
+            <div class="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-6 text-center text-sm text-gray-500 sm:mt-8 sm:px-4 sm:py-8">
                 Aún no hay compras registradas.
             </div>
         @else
-            <ul class="mt-6 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100">
+            <ul class="mt-4 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 sm:mt-6">
                 @foreach($ultimasCompras as $fac)
                     @php
                         $cantCupones = $fac->cuponesComprados->count();
                         $nombreCliente = trim(($fac->cliente->nombres ?? '').' '.($fac->cliente->apellidos ?? ''));
                     @endphp
-                    <li class="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <p class="font-semibold text-gray-900">
+                    <li class="flex flex-col gap-2 px-3 py-3.5 sm:flex-row sm:items-start sm:justify-between sm:px-4 sm:py-4">
+                        <div class="min-w-0 flex-1">
+                            <p class="break-words font-semibold text-gray-900">
                                 Factura #{{ $fac->id_factura }}
                                 <span class="font-normal text-gray-500"> · {{ $nombreCliente }}</span>
                             </p>
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ \Carbon\Carbon::parse($fac->fecha_compra)->format('d/m/Y H:i') }}
-                                · {{ $cantCupones }} {{ $cantCupones === 1 ? 'cupón' : 'cupones' }}
-                                · {{ $fac->metodo_pago }}
+                            <p class="mt-1 text-xs leading-relaxed text-gray-500">
+                                <span>{{ \Carbon\Carbon::parse($fac->fecha_compra)->format('d/m/Y H:i') }}</span>
+                                <span class="mx-1 text-gray-300" aria-hidden="true">·</span>
+                                <span>{{ $cantCupones }} {{ $cantCupones === 1 ? 'cupón' : 'cupones' }}</span>
+                                <span class="mx-1 text-gray-300" aria-hidden="true">·</span>
+                                <span class="break-words">{{ $fac->metodo_pago }}</span>
                             </p>
                         </div>
-                        <p class="shrink-0 text-lg font-bold text-blue-700">${{ number_format($fac->total_pagado, 2) }}</p>
+                        <p class="shrink-0 border-t border-gray-100 pt-3 text-lg font-bold tabular-nums text-blue-700 sm:border-0 sm:pt-0 sm:text-right">${{ number_format($fac->total_pagado, 2) }}</p>
                     </li>
                 @endforeach
             </ul>
@@ -113,7 +118,38 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = @json($chartValues);
     const legend = @json($graficoLegend);
 
-    new Chart(canvas, {
+    var narrowMq = window.matchMedia('(max-width: 639px)');
+    function chartIsNarrow () {
+        return narrowMq.matches;
+    }
+
+    var breakpointLayoutTimer;
+
+    /** Repinta leyenda/ejes al cambiar el breakpoint sin forzar resize() manual (dispara mejor con ResizeObserver interno). */
+    function applyBreakpointLayout (chart, debounceMs) {
+        var narrow = chartIsNarrow();
+        chart.options.plugins.legend.position = narrow ? 'bottom' : 'top';
+        chart.options.plugins.legend.labels = chart.options.plugins.legend.labels || {};
+        chart.options.plugins.legend.labels.padding = narrow ? 10 : 16;
+        var xTicks = chart.options.scales.x.ticks;
+        xTicks.maxRotation = narrow ? 45 : 0;
+        xTicks.autoSkipPadding = narrow ? 4 : 8;
+        chart.options.layout = chart.options.layout || {};
+        chart.options.layout.padding = narrow
+            ? { top: 0, right: 4, bottom: 8, left: 4 }
+            : { top: 4, right: 8, bottom: 4, left: 4 };
+
+        clearTimeout(breakpointLayoutTimer);
+        var ms = typeof debounceMs === 'number' ? debounceMs : 140;
+        breakpointLayoutTimer = setTimeout(function () {
+            requestAnimationFrame(function () {
+                chart.update();
+            });
+        }, ms);
+    }
+
+    var initialNarrow = chartIsNarrow();
+    var chart = new Chart(canvas, {
         type: 'bar',
         data: {
             labels: labels,
@@ -130,18 +166,28 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            resizeDelay: 120,
+            animation: false,
+            layout: {
+                padding: initialNarrow
+                    ? { top: 0, right: 4, bottom: 8, left: 4 }
+                    : { top: 4, right: 8, bottom: 4, left: 4 }
+            },
             scales: {
                 x: {
                     grid: { display: false },
                     ticks: {
                         autoSkip: true,
-                        maxRotation: 0,
-                        font: { size: 11 }
+                        maxRotation: initialNarrow ? 45 : 0,
+                        autoSkipPadding: initialNarrow ? 4 : 8,
+                        font: { size: 10 }
                     }
                 },
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        maxTicksLimit: 6,
+                        font: { size: 10 },
                         callback: function (value) {
                             return '$' + Number(value).toLocaleString('es-SV', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
                         }
@@ -149,7 +195,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             plugins: {
-                legend: { display: true, position: 'top' },
+                legend: {
+                    display: true,
+                    position: initialNarrow ? 'bottom' : 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: initialNarrow ? 10 : 16,
+                        font: { size: 11 }
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: function (ctx) {
@@ -161,6 +215,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    function onBreakpointChange () {
+        applyBreakpointLayout(chart, 160);
+    }
+    if (narrowMq.addEventListener) {
+        narrowMq.addEventListener('change', onBreakpointChange);
+    } else if (narrowMq.addListener) {
+        narrowMq.addListener(onBreakpointChange);
+    }
 });
 </script>
 @endpush
