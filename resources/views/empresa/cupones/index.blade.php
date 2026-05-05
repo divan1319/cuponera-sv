@@ -14,7 +14,7 @@
             <div class="md:col-span-4">
                 <label class="mb-1 block text-sm font-medium text-slate-700">Buscar por código</label>
                 <input type="text" name="buscar" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                       value="{{ request('buscar') }}" placeholder="Ej: CUP-ABC123">
+                       value="{{ request('buscar') }}" placeholder="Ej: CPN-0000000000000000">
             </div>
             <div class="md:col-span-3">
                 <label class="mb-1 block text-sm font-medium text-slate-700">Estado</label>

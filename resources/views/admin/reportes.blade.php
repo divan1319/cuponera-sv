@@ -4,7 +4,6 @@
 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
     <div>
         <h1 class="text-3xl font-bold tracking-tight text-gray-900">Reporte General de Ganancias</h1>
-        <p class="mt-2 text-sm text-gray-500">RF-04: Resumen de ingresos y comisiones por empresa.</p>
     </div>
     <div class="rounded-xl bg-green-50 px-4 py-3 border border-green-100">
         <p class="text-sm font-medium text-green-800">Total Plataforma</p>
