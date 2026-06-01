@@ -6,6 +6,7 @@ use App\Models\Cliente;
 use App\Models\CuponComprado;
 use App\Models\Empresa;
 use App\Models\Factura;
+use App\Models\Rol;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -394,5 +395,83 @@ class AdminService
             }
             User::query()->where('id', $cliente->user_id)->delete();
         });
+    }
+
+    /**
+     * Listado paginado de administradores con búsqueda opcional por nombre o correo.
+     *
+     * @param  string  $busqueda  Término recortado; vacío omite filtros.
+     */
+    public function paginarAdminsAdministracion(string $busqueda, int $porPagina = 15): LengthAwarePaginator
+    {
+        $query = User::query()
+            ->whereHas('rol', fn ($q) => $q->where('nombre', 'Admin'));
+
+        if ($busqueda !== '') {
+            $query->where(function ($q) use ($busqueda) {
+                $q->where('name', 'like', '%'.$busqueda.'%')
+                    ->orWhere('email', 'like', '%'.$busqueda.'%');
+            });
+        }
+
+        return $query
+            ->orderBy('name')
+            ->paginate($porPagina)
+            ->withQueryString();
+    }
+
+    /**
+     * Cantidad total de administradores existentes (sin filtro de estado).
+     */
+    public function contarAdmins(): int
+    {
+        return (int) User::query()
+            ->whereHas('rol', fn ($q) => $q->where('nombre', 'Admin'))
+            ->count();
+    }
+
+    /**
+     * Crea un nuevo usuario con rol Admin.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    public function crearAdmin(array $datos): User
+    {
+        $idRolAdmin = (int) Rol::query()->where('nombre', 'Admin')->value('id_rol');
+
+        return User::create([
+            'name' => $datos['name'],
+            'email' => $datos['email'],
+            'password' => $datos['password'],
+            'id_rol' => $idRolAdmin,
+            'estado' => 'Activo',
+        ]);
+    }
+
+    /**
+     * Actualiza nombre/correo de un administrador. La contraseña se actualiza solo si viene informada.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    public function actualizarAdmin(User $admin, array $datos): void
+    {
+        $payload = [
+            'name' => $datos['name'],
+            'email' => $datos['email'],
+        ];
+
+        if (! empty($datos['password'])) {
+            $payload['password'] = $datos['password'];
+        }
+
+        $admin->update($payload);
+    }
+
+    /**
+     * Elimina un administrador.
+     */
+    public function eliminarAdmin(User $admin): void
+    {
+        $admin->delete();
     }
 }

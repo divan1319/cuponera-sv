@@ -90,6 +90,10 @@
                        href="{{ route('admin.clientes.index') }}">
                         Clientes
                     </a>
+                    <a class="text-sm font-medium transition {{ request()->routeIs('admin.admins.*') ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-500 hover:text-gray-900' }}"
+                       href="{{ route('admin.admins.index') }}">
+                        Admins
+                    </a>
                 </nav>
             </div>
         </div>

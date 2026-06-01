@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AdminActualizarEmpresaRequest;
+use App\Http\Requests\AdminGuardarAdminRequest;
 use App\Http\Requests\AdminProcesarSolicitudEmpresaRequest;
 use App\Models\Cliente;
 use App\Models\Empresa;
+use App\Models\User;
 use App\Services\AdminService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -162,5 +165,62 @@ class AdminController extends Controller
         $this->admin->eliminarClienteFacturasYUsuario($cliente);
 
         return redirect()->route('admin.clientes.index')->with('success', 'Cliente eliminado.');
+    }
+
+    public function adminsIndex(Request $request)
+    {
+        $busqueda = $request->string('q')->trim()->toString();
+        $admins = $this->admin->paginarAdminsAdministracion($busqueda, 15);
+
+        return view('admin.admins.index', compact('admins', 'busqueda'));
+    }
+
+    public function adminsCreate()
+    {
+        return view('admin.admins.create');
+    }
+
+    public function adminsStore(AdminGuardarAdminRequest $request)
+    {
+        $this->admin->crearAdmin($request->validated());
+
+        return redirect()->route('admin.admins.index')->with('success', 'Administrador creado correctamente.');
+    }
+
+    public function adminsEdit(int $id)
+    {
+        $admin = User::query()
+            ->whereHas('rol', fn ($q) => $q->where('nombre', 'Admin'))
+            ->findOrFail($id);
+
+        return view('admin.admins.edit', compact('admin'));
+    }
+
+    public function adminsUpdate(AdminGuardarAdminRequest $request)
+    {
+        $admin = $request->admin();
+
+        $this->admin->actualizarAdmin($admin, $request->validated());
+
+        return redirect()->route('admin.admins.index')->with('success', 'Administrador actualizado correctamente.');
+    }
+
+    public function adminsDestroy(int $id)
+    {
+        $admin = User::query()
+            ->whereHas('rol', fn ($q) => $q->where('nombre', 'Admin'))
+            ->findOrFail($id);
+
+        if (Auth::id() === $admin->id) {
+            return redirect()->back()->with('error', 'No puedes eliminar tu propia cuenta de administrador.');
+        }
+
+        if ($this->admin->contarAdmins() <= 1) {
+            return redirect()->back()->with('error', 'No se puede eliminar el último administrador del sistema.');
+        }
+
+        $this->admin->eliminarAdmin($admin);
+
+        return redirect()->route('admin.admins.index')->with('success', 'Administrador eliminado.');
     }
 }

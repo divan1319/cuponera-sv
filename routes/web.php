@@ -26,6 +26,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/clientes', [AdminController::class, 'clientesIndex'])->name('admin.clientes.index');
         Route::get('/clientes/{id}', [AdminController::class, 'clientesShow'])->whereNumber('id')->name('admin.clientes.show');
         Route::delete('/clientes/{id}', [AdminController::class, 'clientesDestroy'])->whereNumber('id')->name('admin.clientes.destroy');
+        Route::get('/admins', [AdminController::class, 'adminsIndex'])->name('admin.admins.index');
+        Route::get('/admins/crear', [AdminController::class, 'adminsCreate'])->name('admin.admins.create');
+        Route::post('/admins', [AdminController::class, 'adminsStore'])->name('admin.admins.store');
+        Route::get('/admins/{id}/editar', [AdminController::class, 'adminsEdit'])->whereNumber('id')->name('admin.admins.edit');
+        Route::put('/admins/{id}', [AdminController::class, 'adminsUpdate'])->whereNumber('id')->name('admin.admins.update');
+        Route::delete('/admins/{id}', [AdminController::class, 'adminsDestroy'])->whereNumber('id')->name('admin.admins.destroy');
     });
 });
 
